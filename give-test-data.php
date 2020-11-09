@@ -1,7 +1,7 @@
 <?php namespace GiveTestData;
 
 use GiveTestData\Addon\Environment;
-use GiveTestData\TestData\Addons;
+use GiveTestData\TestData\Helpers\Addons;
 use GiveTestData\TestData\ServiceProvider;
 
 /**
