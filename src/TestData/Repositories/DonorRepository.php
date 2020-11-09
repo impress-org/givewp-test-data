@@ -34,11 +34,6 @@ class DonorRepository {
 	public function insertDonor( $donor ) {
 		global $wpdb;
 
-		$donor = wp_parse_args(
-			apply_filters( 'give-test-data-donor-definition', $donor ),
-			$this->donorFactory->definition()
-		);
-
 		// Insert donor
 		$wpdb->insert(
 			"{$wpdb->prefix}give_donors",
@@ -50,13 +45,16 @@ class DonorRepository {
 		);
 		$donorID        = $wpdb->insert_id;
 		$metaRepository = new MetaRepository( 'give_donormeta', 'donor_id' );
-		$metaRepository->persist(
-			$donorID,
+
+		$donorMeta = wp_parse_args(
+			apply_filters( 'give-test-data-donor-meta', $donorID, $donor ),
 			[
 				'_give_donor_first_name' => $donor['first_name'],
 				'_give_donor_last_name'  => $donor['last_name'],
 			]
 		);
+
+		$metaRepository->persist( $donorID, $donorMeta );
 
 		do_action( 'give-test-data-insert-donor', $donorID, $donor );
 	}
