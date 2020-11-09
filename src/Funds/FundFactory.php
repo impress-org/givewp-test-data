@@ -7,6 +7,16 @@ use GiveTestData\TestData\Framework\Factory;
 class FundFactory extends Factory {
 
 	/**
+	 * @return int
+	 */
+	public function getRandomFund() {
+		global $wpdb;
+		$fundIds = $wpdb->get_col( "SELECT id FROM {$wpdb->prefix}give_funds" );
+
+		return $this->faker->randomElement( $fundIds );
+	}
+
+	/**
 	 * @return array
 	 */
 	public function definition() {

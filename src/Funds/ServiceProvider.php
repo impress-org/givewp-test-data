@@ -33,7 +33,7 @@ class ServiceProvider implements GiveServiceProvider {
 		add_filter(
 			'give-test-data-revenue-definition',
 			function ( $args ) {
-				$args['fund_id'] = ( give()->make( RandomFundProvider::class ) )();
+				$args['fund_id'] = give( FundFactory::class )->getRandomFund();
 
 				return $args;
 			}
