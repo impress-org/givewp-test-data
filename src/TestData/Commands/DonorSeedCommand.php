@@ -26,7 +26,10 @@ class DonorSeedCommand {
 	 * @param DonorFactory $donorFactory
 	 * @param DonorRepository $donorRepository
 	 */
-	public function __construct( DonorFactory $donorFactory, DonorRepository $donorRepository ) {
+	public function __construct(
+		DonorFactory $donorFactory,
+		DonorRepository $donorRepository
+	) {
 		$this->donorFactory    = $donorFactory;
 		$this->donorRepository = $donorRepository;
 	}
