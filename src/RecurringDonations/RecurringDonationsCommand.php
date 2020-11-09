@@ -10,12 +10,13 @@ use GiveTestData\TestData\Factories\DonationFactory as DonationsFactory;
  * A WP-CLI command for seeding test data.
  */
 class RecurringDonationsCommand {
+
+	use ProviderForwarder;
+
 	/**
 	 * @var RecurringDonationsCommand
 	 */
 	private $donationsFactory;
-
-	use ProviderForwarder;
 
 	/**
 	 * @param DonationsFactory $donationsFactory
