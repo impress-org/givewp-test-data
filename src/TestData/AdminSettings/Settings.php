@@ -41,7 +41,7 @@ class Settings extends \Give_Settings_Page {
 			'pages'     => esc_html__( 'Generate Pages', 'give-test-data' ),
 		];
 
-		return apply_filters( 'give_get_sections_' . $this->id, $sections );
+		return $sections;
 	}
 
 	/**
@@ -58,7 +58,7 @@ class Settings extends \Give_Settings_Page {
 			'pages'     => Pages::class,
 		];
 
-		return apply_filters( 'give_get_sections_pages_' . $this->id, $actions );
+		return $actions;
 	}
 
 	/**
