@@ -6,11 +6,8 @@ use GiveTestData\Addon\View;
 use InvalidArgumentException;
 
 /**
- * Example code to show how to add setting page to give settings.
- *
- * @package     GiveTestData\Addon
- * @subpackage  Classes/Give_BP_Admin_Settings
- * @copyright   Copyright (c) 2020, GiveWP
+ * Class Settings
+ * @package GiveTestData\TestData\AdminSettings
  */
 class Settings extends \Give_Settings_Page {
 
@@ -28,7 +25,7 @@ class Settings extends \Give_Settings_Page {
 	}
 
 	/**
-	 * Get sections.
+	 * Get settings page sections.
 	 *
 	 * @return array
 	 * @since 1.0.0
@@ -41,24 +38,51 @@ class Settings extends \Give_Settings_Page {
 			'pages'     => esc_html__( 'Generate Pages', 'give-test-data' ),
 		];
 
-		return $sections;
+		return apply_filters( 'give_get_sections_' . $this->id, $sections );
 	}
 
 	/**
-	 * Get sections pages.
+	 * Get section pages.
 	 *
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function get_sections_pages() {
-		$actions = [
+	public function get_sections_content() {
+		$content = [
 			'forms'     => Forms::class,
 			'donors'    => Donors::class,
 			'donations' => Donations::class,
-			'pages'     => Pages::class,
+			'pages'     => Pages::class
 		];
 
-		return $actions;
+		return apply_filters( 'give_get_sections_pages_' . $this->id, $content );
+	}
+
+	/**
+	 * Get current section settings page
+	 *
+	 * @return SettingsPage
+	 * @since  1.0.0
+	 */
+	public function get_current_settings_page() {
+		$pages   = $this->get_sections_content();
+		$section = give_get_current_setting_section();
+
+		if ( ! array_key_exists( $section, $pages ) ) {
+			throw new InvalidArgumentException(
+				sprintf( 'Section %s doesn\t have registered content', $section )
+			);
+		}
+
+		$settingsPage = give( $pages[ $section ] );
+
+		if ( ! $settingsPage instanceof SettingsPage ) {
+			throw new InvalidArgumentException(
+				sprintf( '%s must implement the %s\SettingsPage interface', get_class( $settingsPage ), __NAMESPACE__ )
+			);
+		}
+
+		return $settingsPage;
 	}
 
 	/**
@@ -68,26 +92,13 @@ class Settings extends \Give_Settings_Page {
 	 * @since  1.0.0
 	 */
 	public function output() {
-		$section = give_get_current_setting_section();
-		$actions = $this->get_sections_pages();
-
-		if ( array_key_exists( $section, $actions ) ) {
-
-			$page = give( $actions[ $section ] );
-
-			if ( ! $page instanceof SettingsPage ) {
-				throw new InvalidArgumentException(
-					sprintf( '%s must implement the %s\SettingsPage interface', get_class( $page ), __NAMESPACE__ )
-				);
-			}
-
-			// Render settings.
-			View::render(
-				'admin/content',
-				[
-					'content' => $page->renderPage(),
-				]
-			);
-		}
+		$settingsPage = $this->get_current_settings_page();
+		// Render settings.
+		View::render(
+			'admin/content',
+			[
+				'content' => $settingsPage->renderPage(),
+			]
+		);
 	}
 }
