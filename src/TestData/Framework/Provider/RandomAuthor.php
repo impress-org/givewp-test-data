@@ -8,8 +8,12 @@ namespace GiveTestData\TestData\Framework\Provider;
 class RandomAuthor extends RandomProvider {
 
 	public function __invoke() {
-		global $wpdb;
-		$authorIDs = $wpdb->get_col( "SELECT id FROM {$wpdb->prefix}users" );
+		$authorIDs = get_users(
+			[
+				'fields'   => 'ID',
+				'role__in' => [ 'administrator', 'editor', 'author' ],
+			]
+		);
 
 		return $this->faker->randomElement( $authorIDs );
 	}
