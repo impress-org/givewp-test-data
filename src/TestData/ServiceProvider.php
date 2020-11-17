@@ -13,6 +13,7 @@ use GiveTestData\Addon\Language;
 use GiveTestData\TestData\Commands\DonorSeedCommand;
 use GiveTestData\TestData\Commands\DonationSeedCommand;
 use GiveTestData\TestData\Commands\DonationStatusCommand;
+use GiveTestData\TestData\Commands\PageSeedCommand;
 use Give\ServiceProviders\ServiceProvider as GiveServiceProvider;
 
 
@@ -58,5 +59,6 @@ class ServiceProvider implements GiveServiceProvider {
 		WP_CLI::add_command( 'give test-donors', give()->make( DonorSeedCommand::class ) );
 		WP_CLI::add_command( 'give test-donations', give()->make( DonationSeedCommand::class ) );
 		WP_CLI::add_command( 'give test-donation-statuses', give()->make( DonationStatusCommand::class ) );
+		WP_CLI::add_command( 'give test-demonstration-page', give()->make( PageSeedCommand::class ) );
 	}
 }
