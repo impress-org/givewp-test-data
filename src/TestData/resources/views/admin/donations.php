@@ -64,9 +64,6 @@
 	<button class="button button-primary">
 		<?php esc_html_e( 'Generate Donations', 'give-test-data' ); ?>
 	</button>
-	<button class="button">
-		<?php esc_html_e( 'Export Donations', 'give-test-data' ); ?>
-	</button>
 </div>
 
 
