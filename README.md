@@ -1,4 +1,4 @@
-# GiveWP - Addon Boilerplate
+# GiveWP - Test Data
 A demo plugin to serve as a boilerplate for developers to understand how to extend the GiveWP Donation
 plugin for WordPress.
 
