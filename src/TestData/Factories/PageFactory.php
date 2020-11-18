@@ -28,6 +28,9 @@ class PageFactory extends Factory {
 
 	/**
 	 * Page content
+	 *
+	 * @return string
+	 * @since 1.0.0
 	 */
 	public function getContent() {
 

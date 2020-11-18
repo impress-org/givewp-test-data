@@ -22,7 +22,7 @@ class PageSeedCommand {
 	}
 
 	/**
-	 * Generates GiveWP demonstartion page with all GiveWP shortcodes
+	 * Generates GiveWP demonstartion page with all GiveWP shortcodes included
 	 *
 	 * [--preview=<preview>]
 	 * : Preview generated data
@@ -46,7 +46,7 @@ class PageSeedCommand {
 				array_keys( $page )
 			);
 		} else {
-			$progress = WP_CLI\Utils\make_progress_bar( 'Generating demonstration pages', 1 );
+			$progress = WP_CLI\Utils\make_progress_bar( 'Generating demonstration page', 1 );
 
 			wp_insert_post( $page );
 			$progress->finish();
