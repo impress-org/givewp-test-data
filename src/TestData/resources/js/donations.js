@@ -51,7 +51,7 @@ const getSelectedDonationsStatusesData = () => {
 	return { data, totalDonationsCount };
 };
 
-const generateDonations = async( e ) => {
+const generateDonations = ( e ) => {
 	e.preventDefault();
 
 	const { data, totalDonationsCount } = getSelectedDonationsStatusesData();

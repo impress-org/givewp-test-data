@@ -21,7 +21,7 @@ const getDonorsCount = () => {
 	return false;
 };
 
-const generateDonors = async( e ) => {
+const generateDonors = ( e ) => {
 	e.preventDefault();
 
 	const count = getDonorsCount();
