@@ -27,8 +27,9 @@ class ServiceProvider implements GiveServiceProvider {
 		}
 
 		// Actions
-		Hooks::addAction( 'give-test-data-after-donations-table', RecurringDonationsSettings::class, 'renderDonationOptions' );
 		Hooks::addAction( 'give-test-data-pages-end', RecurringDonationsSettings::class, 'renderPagesOptions' );
+		// Update donation meta on donation insert
+		Hooks::addAction( 'give-test-data-insert-donation', RecurringDonations::class, 'insertRecurringDonation', 10, 2 );
 	}
 
 	/**
