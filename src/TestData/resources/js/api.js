@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+export const CancelToken = axios.CancelToken.source();
+
 export default axios.create( {
 	baseURL: window.GiveTestData.apiRoot,
 	headers: {
