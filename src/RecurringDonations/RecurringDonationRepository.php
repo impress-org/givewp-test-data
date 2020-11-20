@@ -51,6 +51,6 @@ class RecurringDonationRepository {
 			]
 		);
 
-		do_action( 'give-test-data-insert-donation', $wpdb->insert_id, $donation );
+		do_action( 'give-test-data-insert-recurring-donation', $wpdb->insert_id, $donation );
 	}
 }
