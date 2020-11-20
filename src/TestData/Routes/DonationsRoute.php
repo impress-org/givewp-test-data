@@ -91,6 +91,8 @@ class DonationsRoute extends Endpoint {
 	 * @since 1.0.0
 	 */
 	public function handleRequest( WP_REST_Request $request ) {
+		global $wpdb;
+
 		$donationFactory    = give( DonationFactory::class );
 		$donationRepository = give( DonationRepository::class );
 
@@ -109,7 +111,7 @@ class DonationsRoute extends Endpoint {
 		// Generate donations
 		$donations = $donationFactory->make( $donationsCount );
 		// Start DB transaction
-		$GLOBALS['wpdb']->query( 'START TRANSACTION' );
+		$wpdb->query( 'START TRANSACTION' );
 
 		try {
 
@@ -117,7 +119,7 @@ class DonationsRoute extends Endpoint {
 				$donationRepository->insertDonation( $donation );
 			}
 
-			$GLOBALS['wpdb']->query( 'COMMIT' );
+			$wpdb->query( 'COMMIT' );
 
 			$responseData = [
 				'status'  => true,
@@ -127,7 +129,7 @@ class DonationsRoute extends Endpoint {
 			];
 
 		} catch ( Throwable $e ) {
-			$GLOBALS['wpdb']->query( 'ROLLBACK' );
+			$wpdb->query( 'ROLLBACK' );
 
 			$responseData = [
 				'status'  => false,

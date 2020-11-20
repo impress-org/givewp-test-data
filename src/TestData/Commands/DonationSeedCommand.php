@@ -72,6 +72,7 @@ class DonationSeedCommand {
 	 * @when after_wp_load
 	 */
 	public function __invoke( $args, $assocArgs ) {
+		global $wpdb;
 		// Get CLI args
 		$count        = WP_CLI\Utils\get_flag_value( $assocArgs, 'count', $default = 10 );
 		$preview      = WP_CLI\Utils\get_flag_value( $assocArgs, 'preview', $default = false );
@@ -107,21 +108,21 @@ class DonationSeedCommand {
 			$progress = WP_CLI\Utils\make_progress_bar( 'Generating donations', $count );
 
 			// Start DB transaction
-			$GLOBALS['wpdb']->query( 'START TRANSACTION' );
+			$wpdb->query( 'START TRANSACTION' );
 
 			try {
-				
+
 				foreach ( $donations as $donation ) {
 					$this->donationRepository->insertDonation( $donation );
 					$progress->tick();
 				}
 
-				$GLOBALS['wpdb']->query( 'COMMIT' );
+				$wpdb->query( 'COMMIT' );
 
 				$progress->finish();
 
 			} catch ( Throwable $e ) {
-				$GLOBALS['wpdb']->query( 'ROLLBACK' );
+				$wpdb->query( 'ROLLBACK' );
 
 				WP_CLI::error( $e->getMessage() );
 			}
