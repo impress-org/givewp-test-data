@@ -24,9 +24,7 @@ abstract class Endpoint implements RestRoute {
 	 *
 	 */
 	public function validateDonationStatus( $param ) {
-		$statuses = apply_filters( 'give-test-data-donation-statuses', give_get_payment_statuses() );
-
-		return in_array( $param, array_keys( $statuses ), true );
+		return in_array( $param, array_keys( give_get_payment_statuses() ), true );
 	}
 
 	/**
