@@ -74,11 +74,11 @@ class DonationsRoute extends Endpoint {
 				],
 				'count'   => [
 					'type'        => 'integer',
-					'description' => esc_html__( 'Start Date', 'give-funds' ),
+					'description' => esc_html__( 'Number of donations to generate', 'give-test-data' ),
 				],
 				'revenue' => [
 					'type'        => 'integer',
-					'description' => esc_html__( 'End Date', 'give-funds' ),
+					'description' => esc_html__( 'Revenue amount', 'give-test-data' ),
 				],
 			],
 		];
