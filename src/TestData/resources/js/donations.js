@@ -1,4 +1,12 @@
 import API, { CancelToken } from './api';
+// Common
+import {
+	processHasErrors,
+	updateDescription,
+	showRequestError,
+	updateProgerssBar,
+	generationStart,
+} from './utils';
 
 const { __, sprintf } = wp.i18n;
 const donationStatuses = document.querySelectorAll( 'input[name*="give_test_data_status"]' );
@@ -27,56 +35,6 @@ const getSelectedStatusState = ( element ) => {
 		count: parseInt( document.querySelector( `input[name*="give_test_data_count[${ status }]"]` ).value ),
 		revenue: parseInt( document.querySelector( `input[name*="give_test_data_revenue[${ status }]"]` ).value ),
 	};
-};
-
-const processHasErrors = () => document.querySelector( '.give-test-data-process-error' );
-
-const donationsGenerationStart = () => {
-	showGenerateButton( false );
-	updateDescription( 'Initializing...' );
-	updateProgerssBar( 0 );
-};
-
-const showGenerateButton = ( show ) => {
-	// Update title
-	document
-		.querySelector( '.give-popup-form-button' )
-		.classList.toggle( 'give-hidden', ! show );
-};
-
-const updateDescription = ( description ) => {
-	const descriptionElement = document.querySelector( '.give-test-data-description-container' );
-
-	// Create element if not exist
-	if ( ! descriptionElement ) {
-		const element = document.createElement( 'p' );
-		element.classList.add( 'give-test-data-description-container' );
-		element.innerHTML = description;
-		document.querySelector( '.give-modal__title' ).after( element );
-	} else {
-		descriptionElement.innerHTML = description;
-	}
-};
-
-const showRequestError = ( error ) => {
-	const element = document.querySelector( '.give-modal__description' );
-	const descriptionElement = document.querySelector( '.give-test-data-description-container' );
-
-	if ( element ) {
-		element.innerHTML = `<p class="give-test-data-process-error" style="color: red;">${ error }</p>`;
-	}
-
-	if ( descriptionElement ) {
-		descriptionElement.remove();
-	}
-};
-
-const updateProgerssBar = ( percent ) => {
-	const element = document.querySelector( '.give-modal__description' );
-
-	if ( element ) {
-		element.innerHTML = `<div class="give-progress"><div style="width:${ parseInt( percent ) }%;"></div></div>`;
-	}
 };
 
 const getSelectedDonationsStatusesData = () => {
@@ -135,7 +93,7 @@ const generateDonations = async( e ) => {
 			link_text: '',
 		},
 		async successConfirm() {
-			donationsGenerationStart();
+			generationStart();
 
 			for ( const [ status, statusData ] of Object.entries( data ) ) {
 				if ( statusData.revenue ) {
