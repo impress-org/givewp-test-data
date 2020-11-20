@@ -29,15 +29,7 @@ class RecurringDonations {
 	public function getRecurringDonationStatus() {
 		return 'give_subscription';
 	}
-
-	/**
-	 * @param array $statuses
-	 *
-	 * @return array
-	 */
-	public function registerStatus( $statuses ) {
-		return array_merge( $statuses, [ $this->getRecurringDonationStatus() ] );
-	}
+	
 
 	/**
 	 * @param int $donationID
