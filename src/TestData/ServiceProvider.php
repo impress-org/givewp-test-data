@@ -16,6 +16,7 @@ use GiveTestData\TestData\Commands\DonationStatusCommand;
 use GiveTestData\TestData\Commands\PageSeedCommand;
 use Give\ServiceProviders\ServiceProvider as GiveServiceProvider;
 use GiveTestData\TestData\Routes\DonationsRoute;
+use GiveTestData\TestData\Routes\DonorsRoute;
 
 
 /**
@@ -47,7 +48,8 @@ class ServiceProvider implements GiveServiceProvider {
 
 		// Register REST routes
 		Hooks::addAction( 'rest_api_init', DonationsRoute::class, 'registerRoute' );
-		
+		Hooks::addAction( 'rest_api_init', DonorsRoute::class, 'registerRoute' );
+
 		// Load add-on translations.
 		Hooks::addAction( 'init', Language::class, 'load' );
 		// Load assets.
