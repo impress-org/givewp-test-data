@@ -3,6 +3,7 @@
 namespace GiveTestData\TestData\Commands;
 
 use WP_CLI;
+use Throwable;
 use GiveTestData\TestData\Factories\DonationFactory as DonationFactory;
 use GiveTestData\TestData\Repositories\DonationRepository as DonationRepository;
 
@@ -71,6 +72,7 @@ class DonationSeedCommand {
 	 * @when after_wp_load
 	 */
 	public function __invoke( $args, $assocArgs ) {
+		global $wpdb;
 		// Get CLI args
 		$count        = WP_CLI\Utils\get_flag_value( $assocArgs, 'count', $default = 10 );
 		$preview      = WP_CLI\Utils\get_flag_value( $assocArgs, 'preview', $default = false );
@@ -105,12 +107,26 @@ class DonationSeedCommand {
 		} else {
 			$progress = WP_CLI\Utils\make_progress_bar( 'Generating donations', $count );
 
-			foreach ( $donations as $donation ) {
-				$this->donationRepository->insertDonation( $donation );
-				$progress->tick();
-			}
+			// Start DB transaction
+			$wpdb->query( 'START TRANSACTION' );
 
-			$progress->finish();
+			try {
+
+				foreach ( $donations as $donation ) {
+					$this->donationRepository->insertDonation( $donation );
+					$progress->tick();
+				}
+
+				$wpdb->query( 'COMMIT' );
+
+				$progress->finish();
+
+			} catch ( Throwable $e ) {
+				$wpdb->query( 'ROLLBACK' );
+
+				WP_CLI::error( $e->getMessage() );
+			}
 		}
+
 	}
 }

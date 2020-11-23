@@ -31,5 +31,14 @@ class Assets {
 			GIVE_TEST_DATA_VERSION,
 			true
 		);
+		
+		wp_localize_script(
+			'give-test-data-script-backend',
+			'GiveTestData',
+			[
+				'apiRoot'  => esc_url_raw( rest_url( 'give-api/v2/give-test-data' ) ),
+				'apiNonce' => wp_create_nonce( 'wp_rest' ),
+			]
+		);
 	}
 }
