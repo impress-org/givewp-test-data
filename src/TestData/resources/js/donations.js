@@ -1,16 +1,20 @@
 import API, { CancelToken } from './api';
 // Common
 import {
-	processHasErrors,
 	updateDescription,
 	showRequestError,
 	updateProgerssBar,
 	generationStart,
+	AppState,
 } from './utils';
 
 const { __, sprintf } = wp.i18n;
 const donationStatuses = document.querySelectorAll( 'input[name*="give_test_data_status"]' );
 const generateDonationsBtn = document.querySelector( '#give-test-data-generate-donations' );
+// App state
+const State = new AppState( {
+	error: false,
+} );
 
 const handleStatusSelect = ( e ) => {
 	const element = e.currentTarget;
@@ -93,7 +97,7 @@ const generateDonations = ( e ) => {
 			link_text: '',
 		},
 		async successConfirm() {
-			generationStart();
+			generationStart( CancelToken );
 
 			for ( const [ status, statusData ] of Object.entries( data ) ) {
 				if ( statusData.revenue ) {
@@ -108,7 +112,7 @@ const generateDonations = ( e ) => {
 				} );
 			}
 
-			if ( ! processHasErrors() ) {
+			if ( ! State.get( 'error' ) ) {
 				window.location.reload( true );
 			}
 		},
@@ -118,30 +122,47 @@ const generateDonations = ( e ) => {
 const generateDonationsRequest = ( { status, count, revenue, statusName, total } ) => {
 	return API.post( '/generate-donations', { status, count, revenue }, { cancelToken: CancelToken.token } )
 		.then( async( response ) => {
-			updateProgerssBar( ( total - count ) / total * 100 );
 			// Update description only once
 			if ( count === total ) {
 				updateDescription( sprintf( __( 'Generating donations with status <string>%s</string>', 'give-test-data' ), statusName ) );
 			}
-			// Check if it has more donations to process
-			if ( response.data.status && response.data.hasMore ) {
-				await generateDonationsRequest( {
-					status,
-					count: response.data.hasMore,
-					revenue,
-					statusName,
-					total,
-				} );
+
+			// Check status
+			if ( response.data.status ) {
+				// Check if it has more donations to process
+				if ( response.data.hasMore ) {
+					updateProgerssBar( ( total - count ) / total * 100 );
+
+					await generateDonationsRequest( {
+						status,
+						count: response.data.hasMore,
+						revenue,
+						statusName,
+						total,
+					} );
+				} else {
+					updateProgerssBar( 100 );
+				}
+			} else {
+				CancelToken.cancel();
+				State.set( { error: true } );
+
+				const message = response.data.message
+					? response.data.message
+					: __( 'Something went wrong. Check the error log', 'give-test-data' );
+
+				showRequestError( message );
 			}
 		} )
 		.catch( ( err ) => {
+			CancelToken.cancel();
+			State.set( { error: true } );
+
 			if ( err.response ) {
 				// eslint-disable-next-line no-console
 				console.error( err.response.data );
 				showRequestError( err.response.data.message );
 			}
-
-			CancelToken.cancel();
 		} );
 };
 

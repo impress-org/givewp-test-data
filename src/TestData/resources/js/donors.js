@@ -1,15 +1,19 @@
 import API, { CancelToken } from './api';
 // Common
 import {
-	processHasErrors,
 	updateDescription,
 	showRequestError,
 	updateProgerssBar,
 	generationStart,
+	AppState,
 } from './utils';
 
 const { __, sprintf } = wp.i18n;
 const generateDonorsBtn = document.querySelector( '#give-test-data-generate-donors' );
+// App state
+const State = new AppState( {
+	error: false,
+} );
 
 const getDonorsCount = () => {
 	const input = document.querySelector( '#give-test-data-donors-count' );
@@ -49,14 +53,14 @@ const generateDonors = ( e ) => {
 			link_text: '',
 		},
 		async successConfirm() {
-			generationStart();
+			generationStart( CancelToken );
 
 			await generateDonorsRequest( {
 				count,
 				total: count,
 			} );
 
-			if ( ! processHasErrors() ) {
+			if ( ! State.get( 'error' ) ) {
 				window.location.reload( true );
 			}
 		},
@@ -70,23 +74,39 @@ const generateDonorsRequest = ( { count, total } ) => {
 			if ( count === total ) {
 				updateDescription( __( 'Generating donors', 'give-test-data' ) );
 			}
-			updateProgerssBar( ( total - count ) / total * 100 );
-			// Check if it has more donors to process
-			if ( response.data.status && response.data.hasMore ) {
-				await generateDonorsRequest( {
-					count: response.data.hasMore,
-					total,
-				} );
+
+			if ( response.data.status ) {
+				// Check if it has more donors to process
+				if ( response.data.hasMore ) {
+					updateProgerssBar( ( total - count ) / total * 100 );
+
+					await generateDonorsRequest( {
+						count: response.data.hasMore,
+						total,
+					} );
+				} else {
+					updateProgerssBar( 100 );
+				}
+			} else {
+				CancelToken.cancel();
+				State.set( { error: true } );
+
+				const message = response.data.message
+					? response.data.message
+					: __( 'Something went wrong. Check the error log', 'give-test-data' );
+
+				showRequestError( message );
 			}
 		} )
 		.catch( ( err ) => {
+			CancelToken.cancel();
+			State.set( { error: true } );
+
 			if ( err.response ) {
 				// eslint-disable-next-line no-console
 				console.error( err.response.data );
 				showRequestError( err.response.data.message );
 			}
-
-			CancelToken.cancel();
 		} );
 };
 
