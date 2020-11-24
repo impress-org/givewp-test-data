@@ -3,6 +3,7 @@
 namespace GiveTestData\Funds;
 
 use WP_CLI;
+use Throwable;
 
 /**
  * Class FundCommand
@@ -48,6 +49,7 @@ class FundCommand {
 	 * @when after_wp_load
 	 */
 	public function __invoke( $args, $assocArgs ) {
+		global $wpdb;
 		// Get CLI args
 		$count   = WP_CLI\Utils\get_flag_value( $assocArgs, 'count', $default = 5 );
 		$preview = WP_CLI\Utils\get_flag_value( $assocArgs, 'preview', $default = false );
@@ -63,12 +65,22 @@ class FundCommand {
 		} else {
 			$progress = WP_CLI\Utils\make_progress_bar( 'Generating funds', $count );
 
-			foreach ( $funds as $fund ) {
-				$this->fundsRepository->insertFund( $fund );
-				$progress->tick();
-			}
+			try {
 
-			$progress->finish();
+				foreach ( $funds as $fund ) {
+					$this->fundsRepository->insertFund( $fund );
+					$progress->tick();
+				}
+
+				$wpdb->query( 'COMMIT' );
+
+				$progress->finish();
+
+			} catch ( Throwable $e ) {
+				$wpdb->query( 'ROLLBACK' );
+
+				WP_CLI::error( $e->getMessage() );
+			}
 		}
 	}
 }
