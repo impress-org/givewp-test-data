@@ -13,10 +13,12 @@ use GiveTestData\Addon\Language;
 use GiveTestData\TestData\Commands\DonorSeedCommand;
 use GiveTestData\TestData\Commands\DonationSeedCommand;
 use GiveTestData\TestData\Commands\DonationStatusCommand;
+use GiveTestData\TestData\Commands\FormSeedCommand;
 use GiveTestData\TestData\Commands\PageSeedCommand;
 use Give\ServiceProviders\ServiceProvider as GiveServiceProvider;
 use GiveTestData\TestData\Routes\DonationsRoute;
 use GiveTestData\TestData\Routes\DonorsRoute;
+use GiveTestData\TestData\Routes\FormsRoute;
 
 
 /**
@@ -49,6 +51,7 @@ class ServiceProvider implements GiveServiceProvider {
 		// Register REST routes
 		Hooks::addAction( 'rest_api_init', DonationsRoute::class, 'registerRoute' );
 		Hooks::addAction( 'rest_api_init', DonorsRoute::class, 'registerRoute' );
+		Hooks::addAction( 'rest_api_init', FormsRoute::class, 'registerRoute' );
 
 		// Load add-on translations.
 		Hooks::addAction( 'init', Language::class, 'load' );
@@ -66,5 +69,6 @@ class ServiceProvider implements GiveServiceProvider {
 		WP_CLI::add_command( 'give test-donations', give()->make( DonationSeedCommand::class ) );
 		WP_CLI::add_command( 'give test-donation-statuses', give()->make( DonationStatusCommand::class ) );
 		WP_CLI::add_command( 'give test-demonstration-page', give()->make( PageSeedCommand::class ) );
+		WP_CLI::add_command( 'give test-donation-form', give()->make( FormSeedCommand::class ) );
 	}
 }
