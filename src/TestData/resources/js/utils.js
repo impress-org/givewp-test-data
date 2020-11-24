@@ -1,5 +1,3 @@
-export const processHasErrors = () => document.querySelector( '.give-test-data-process-error' );
-
 export const showGenerateButton = ( show ) => {
 	// Update title
 	document
@@ -21,10 +19,20 @@ export const updateDescription = ( description ) => {
 	}
 };
 
-export const generationStart = () => {
+export const generationStart = ( CancelToken ) => {
 	showGenerateButton( false );
 	updateDescription( 'Initializing...' );
 	updateProgerssBar( 0 );
+
+	// Cancel requests if user closes the modal
+	if ( CancelToken ) {
+		document
+			.querySelector( '.give-popup-close-button' )
+			.addEventListener( 'click', function() {
+				CancelToken.cancel();
+				window.location.reload();
+			} );
+	}
 };
 
 export const showRequestError = ( error ) => {
@@ -47,3 +55,23 @@ export const updateProgerssBar = ( percent ) => {
 		element.innerHTML = `<div class="give-progress"><div style="width:${ parseInt( percent ) }%;"></div></div>`;
 	}
 };
+
+export class AppState {
+	constructor( state ) {
+		this.state = state;
+	}
+
+	set( state ) {
+		this.state = ( typeof state === 'function' )
+			? state( this.state )
+			: state;
+	}
+
+	get( key ) {
+		if ( key ) {
+			return this.state[ key ];
+		}
+
+		return this.state;
+	}
+}
