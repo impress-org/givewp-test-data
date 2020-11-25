@@ -27,6 +27,17 @@ abstract class Endpoint implements RestRoute {
 		return in_array( $param, array_keys( give_get_payment_statuses() ), true );
 	}
 
+
+	/**
+	 * @param string $param
+	 *
+	 * @return bool
+	 * @since 1.0.0
+	 */
+	public function validateFormTemplates( $param ) {
+		return in_array( $param, [ 'sequoia', 'legacy', 'random' ], true );
+	}
+
 	/**
 	 * @param string $param
 	 *
