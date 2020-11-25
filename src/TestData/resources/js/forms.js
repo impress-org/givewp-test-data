@@ -1,15 +1,19 @@
 import API, { CancelToken } from './api';
 // Common
 import {
-	processHasErrors,
 	updateDescription,
 	showRequestError,
 	updateProgerssBar,
 	generationStart,
+	AppState,
 } from './utils';
 
 const { __, sprintf } = wp.i18n;
 const generateFormsBtn = document.querySelector( '#give-test-data-generate-forms' );
+// App state
+const State = new AppState( {
+	error: false,
+} );
 
 const getData = () => {
 	return {
@@ -58,7 +62,7 @@ const generateForms = ( e ) => {
 			link_text: '',
 		},
 		async successConfirm() {
-			generationStart();
+			generationStart( CancelToken );
 
 			await generateFormsRequest( {
 				count,
@@ -68,7 +72,7 @@ const generateForms = ( e ) => {
 				setTC,
 			} );
 
-			if ( ! processHasErrors() ) {
+			if ( ! State.get( 'error' ) ) {
 				window.location.reload( true );
 			}
 		},
@@ -82,26 +86,41 @@ const generateFormsRequest = ( { count, total, template, setGoal, setTC } ) => {
 			if ( count === total ) {
 				updateDescription( __( 'Generating donation forms', 'give-test-data' ) );
 			}
-			updateProgerssBar( ( total - count ) / total * 100 );
-			// Check if it has more forms to process
-			if ( response.data.status && response.data.hasMore ) {
-				await generateFormsRequest( {
-					count: response.data.hasMore,
-					total,
-					template,
-					setGoal,
-					setTC,
-				} );
+
+			if ( response.data.status ) {
+				// Check if it has more forms to process
+				if ( response.data.hasMore ) {
+					updateProgerssBar( ( total - count ) / total * 100 );
+					await generateFormsRequest( {
+						count: response.data.hasMore,
+						total,
+						template,
+						setGoal,
+						setTC,
+					} );
+				} else {
+					updateProgerssBar( 100 );
+				}
+			} else {
+				CancelToken.cancel();
+				State.set( { error: true } );
+
+				const message = response.data.message
+					? response.data.message
+					: __( 'Something went wrong. Check the error log', 'give-test-data' );
+
+				showRequestError( message );
 			}
 		} )
 		.catch( ( err ) => {
+			CancelToken.cancel();
+			State.set( { error: true } );
+
 			if ( err.response ) {
 				// eslint-disable-next-line no-console
 				console.error( err.response.data );
 				showRequestError( err.response.data.message );
 			}
-
-			CancelToken.cancel();
 		} );
 };
 
