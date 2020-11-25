@@ -1,4 +1,4 @@
-import API, { CancelToken } from './api';
+import API, { CancelToken } from '../../../TestData/resources/js/api';
 // Common
 import {
 	updateDescription,
@@ -6,37 +6,37 @@ import {
 	updateProgerssBar,
 	generationStart,
 	AppState,
-} from './utils';
+} from '../../../TestData/resources/js/utils';
 
 const { __, sprintf } = wp.i18n;
-const generateDonorsBtn = document.querySelector( '#give-test-data-generate-donors' );
+const generateFundsBtn = document.querySelector( '#give-test-data-generate-funds' );
 // App state
 const State = new AppState( {
 	error: false,
 } );
 
-const getDonorsCount = () => {
-	const input = document.querySelector( '#give-test-data-donors-count' );
+const getFundsCount = () => {
+	const input = document.querySelector( '#give-test-data-funds-count' );
 
 	if ( input ) {
 		return parseInt( input.value );
 	}
 
-	return false;
+	return 0;
 };
 
-const generateDonors = ( e ) => {
+const generateFunds = ( e ) => {
 	e.preventDefault();
 
-	const count = getDonorsCount();
+	const count = getFundsCount();
 
-	// Check the donors count
+	// Check the funds count
 	if ( ! count ) {
 		// eslint-disable-next-line no-undef
 		return new Give.modal.GiveWarningAlert( {
 			modalContent: {
-				title: __( 'Enter number of donors', 'give-test-data' ),
-				desc: __( 'You must enter the number of donors to generate', 'give-test-data' ),
+				title: __( 'Enter number of funds', 'give-test-data' ),
+				desc: __( 'You must enter the number of funds to generate', 'give-test-data' ),
 				cancelBtnTitle: __( 'OK', 'give-test-data' ),
 			},
 		} ).render();
@@ -45,8 +45,8 @@ const generateDonors = ( e ) => {
 	// eslint-disable-next-line no-undef
 	new Give.modal.GiveFormModal( {
 		modalContent: {
-			title: __( 'Generate donors', 'give-test-data' ),
-			desc: sprintf( __( 'Generate %s donors?', 'give-test-data' ), count ),
+			title: __( 'Generate funds', 'give-test-data' ),
+			desc: sprintf( __( 'Generate %s funds?', 'give-test-data' ), count ),
 			cancelBtnTitle: __( 'Close', 'give-test-data' ),
 			confirmBtnTitle: __( 'Generate', 'give-test-data' ),
 			link: '',
@@ -55,11 +55,12 @@ const generateDonors = ( e ) => {
 		async successConfirm() {
 			generationStart( CancelToken );
 
-			await generateDonorsRequest( {
+			await generateFundsRequest( {
 				count,
 				total: count,
 			} );
 
+			// If there is no errors, reload page
 			if ( ! State.get( 'error' ) ) {
 				window.location.reload( true );
 			}
@@ -67,20 +68,20 @@ const generateDonors = ( e ) => {
 	} ).render();
 };
 
-const generateDonorsRequest = ( { count, total } ) => {
-	return API.post( '/generate-donors', { count }, { cancelToken: CancelToken.token } )
+const generateFundsRequest = ( { count, total } ) => {
+	return API.post( '/generate-funds', { count }, { cancelToken: CancelToken.token } )
 		.then( async( response ) => {
 			// Update description only once
 			if ( count === total ) {
-				updateDescription( __( 'Generating donors', 'give-test-data' ) );
+				updateDescription( __( 'Generating funds', 'give-test-data' ) );
 			}
-
+			// Check status
 			if ( response.data.status ) {
-				// Check if it has more donors to process
+				// Check if it has more forms to process
 				if ( response.data.hasMore ) {
 					updateProgerssBar( ( total - count ) / total * 100 );
 
-					await generateDonorsRequest( {
+					await generateFundsRequest( {
 						count: response.data.hasMore,
 						total,
 					} );
@@ -111,6 +112,7 @@ const generateDonorsRequest = ( { count, total } ) => {
 };
 
 // Generate donors
-if ( generateDonorsBtn ) {
-	generateDonorsBtn.addEventListener( 'click', generateDonors, false );
+if ( generateFundsBtn ) {
+	generateFundsBtn.addEventListener( 'click', generateFunds, false );
 }
+

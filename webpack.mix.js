@@ -7,6 +7,7 @@ mix
 
 	// admin assets
 	.js( 'src/TestData/resources/js/give-test-data-admin.js', 'public/js/' )
+	.js( 'src/Funds/resources/js/funds.js', 'public/js/' )
 	.sass( 'src/TestData/resources/css/give-test-data-admin.scss', 'public/css' )
 
 	// images
