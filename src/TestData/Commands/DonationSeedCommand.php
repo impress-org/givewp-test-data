@@ -65,9 +65,13 @@ class DonationSeedCommand {
 	 * : Preview generated data
 	 * default: false
 	 *
+	 * [--start-date=<date>]
+	 * : Set donation start date. Date format is YYYY-MM-DD
+	 * default: false
+	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp give test-donations --count=50 --status=random --total-revenue=10000 --currency=USD
+	 *     wp give test-donations --count=50 --status=random --total-revenue=10000 --currency=USD --start-date=2020-11-22
 	 *
 	 * @when after_wp_load
 	 */
@@ -79,6 +83,7 @@ class DonationSeedCommand {
 		$status       = WP_CLI\Utils\get_flag_value( $assocArgs, 'status', $default = 'publish' );
 		$totalRevenue = WP_CLI\Utils\get_flag_value( $assocArgs, 'total-revenue', $default = 0 );
 		$currency     = WP_CLI\Utils\get_flag_value( $assocArgs, 'currency', $default = give_get_option( 'currency' ) );
+		$startDate    = WP_CLI\Utils\get_flag_value( $assocArgs, 'start-date', $default = false );
 
 		// Check donation status
 		if ( ! $this->donationFactory->checkDonationStatus( $status ) ) {
@@ -93,6 +98,16 @@ class DonationSeedCommand {
 
 		if ( $totalRevenue ) {
 			$this->donationFactory->setDonationAmount( ( $totalRevenue / $count ) );
+		}
+
+		if ( $startDate ) {
+			if ( $this->donationFactory->isValidDate( $startDate ) ) {
+				$this->donationFactory->setDonationStartDate( $startDate );
+			} else {
+				WP_CLI::error(
+					WP_CLI::colorize( "Invalid date: %g{$startDate}%n Valid date format is YYYY-MM-DD" )
+				);
+			}
 		}
 
 		// Generate donations

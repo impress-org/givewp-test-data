@@ -24,6 +24,11 @@ class DonationFactory extends Factory {
 	private $currency;
 
 	/**
+	 * @var string
+	 */
+	private $startDate;
+
+	/**
 	 * @param string $status
 	 */
 	public function setDonationStatus( $status ) {
@@ -97,6 +102,40 @@ class DonationFactory extends Factory {
 		return $this->currency;
 	}
 
+
+	/**
+	 * @param string $date
+	 */
+	public function setDonationStartDate( $date ) {
+		$this->startDate = $date;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getDonationDate() {
+		if ( ! $this->isValidDate( $this->startDate ) ) {
+			return $this->faker->dateTimeThisYear()->format( 'Y-m-d H:i:s' );
+		}
+
+		return $this->faker->dateTimeBetween( $this->startDate, $endDate = 'now' )->format( 'Y-m-d H:i:s' );
+	}
+
+	/**
+	 * @param string $date
+	 *
+	 * @return bool
+	 */
+	public function isValidDate( $date ) {
+		if ( empty( $date ) || false === strpos( $date, '-' ) ) {
+			return false;
+		}
+
+		list ( $year, $month, $day ) = explode( '-', $date );
+
+		return checkdate( $month, $day, $year );
+	}
+
 	/**
 	 * Donation definition
 	 *
@@ -115,7 +154,7 @@ class DonationFactory extends Factory {
 			'payment_mode'         => $this->randomPaymentMode(),
 			'payment_status'       => $this->getDonationStatus(),
 			'payment_purchase_key' => $this->faker->md5(),
-			'completed_date'       => $this->faker->dateTimeThisYear()->format( 'Y-m-d H:i:s' ),
+			'completed_date'       => $this->getDonationDate(),
 		];
 	}
 }

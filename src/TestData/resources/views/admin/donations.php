@@ -1,7 +1,6 @@
 <?php defined( 'ABSPATH' ) or exit; ?>
 
 <h3><?php esc_html_e( 'Donations', 'give-test-data' ); ?></h3>
-
 <table class="give-test-data-table give-table">
     <thead>
     <tr>
@@ -46,6 +45,20 @@
 	<?php endforeach; ?>
     </tbody>
 </table>
+
+<h3><?php esc_html_e( 'Set date', 'give-test-data' ); ?></h3>
+
+<table class="give-test-data-table give-table">
+    <tr>
+        <td>
+			<?php esc_html_e( 'Set the earliest donation date', 'give-test-data' ); ?>
+        </td>
+        <td>
+            <input id="give-test-data-start-date" type="date"/>
+        </td>
+    </tr>
+</table>
+
 
 <?php do_action( 'give-test-data-after-donations-table' ); ?>
 
