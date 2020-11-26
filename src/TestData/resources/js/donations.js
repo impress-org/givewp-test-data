@@ -40,24 +40,33 @@ const getSelectedStatusState = ( element ) => {
 	};
 };
 
-const getSelectedDonationsStatusesData = () => {
-	const data = {};
+const getData = () => {
+	const data = { total: 0 };
 	const selectedStatuses = document.querySelectorAll( 'input[name*="give_test_data_status"]:checked' );
-	let totalDonationsCount = 0;
 
 	for ( const selectedStatus of selectedStatuses ) {
 		const { status, count, revenue, statusName } = getSelectedStatusState( selectedStatus );
-		data[ status ] = { count, revenue, statusName };
-		totalDonationsCount += count;
+
+		data.statuses = {
+			[ status ]: {
+				count,
+				revenue,
+				statusName,
+			},
+		};
+
+		data.total += count;
 	}
 
-	return { data, totalDonationsCount };
+	data.startDate = document.querySelector( '#give-test-data-start-date' ).value;
+
+	return data;
 };
 
 const generateDonations = ( e ) => {
 	e.preventDefault();
 
-	const { data, totalDonationsCount } = getSelectedDonationsStatusesData();
+	const data = getData();
 
 	// Check for selected donations
 	if ( ! Object.keys( data ).length ) {
@@ -70,7 +79,7 @@ const generateDonations = ( e ) => {
 	}
 
 	// Check each status individually
-	for ( const [ , statusData ] of Object.entries( data ) ) {
+	for ( const [ , statusData ] of Object.entries( data.statuses ) ) {
 		if ( ! statusData.count ) {
 			return new GiveModal( {
 				type: 'warning',
@@ -84,13 +93,13 @@ const generateDonations = ( e ) => {
 	new GiveModal( {
 		type: 'form',
 		title: __( 'Generate donations', 'give-test-data' ),
-		content: sprintf( __( 'Generate %s donations?', 'give-test-data' ), totalDonationsCount ),
+		content: sprintf( __( 'Generate %s donations?', 'give-test-data' ), data.total ),
 		cancelButton: __( 'Close', 'give-test-data' ),
 		confirmButton: __( 'Generate', 'give-test-data' ),
 		onConfirm: async() => {
 			generationStart();
 
-			for ( const [ status, statusData ] of Object.entries( data ) ) {
+			for ( const [ status, statusData ] of Object.entries( data.statuses ) ) {
 				if ( statusData.revenue ) {
 					statusData.revenue = parseInt( statusData.revenue ) / parseInt( statusData.count );
 				}
@@ -100,6 +109,7 @@ const generateDonations = ( e ) => {
 					revenue: statusData.revenue,
 					statusName: statusData.statusName,
 					total: statusData.count,
+					startDate: data.startDate,
 				} );
 			}
 
@@ -114,10 +124,15 @@ const generateDonations = ( e ) => {
 	} );
 };
 
-const generateDonationsRequest = ( { status, count, revenue, statusName, total } ) => {
+const generateDonationsRequest = ( { status, count, revenue, statusName, total, startDate } ) => {
 	return API.post( '/generate-donations', {
-		status, count, revenue,
-	}, { cancelToken: CancelToken.token } ).then( async( response ) => {
+		status,
+		count,
+		revenue,
+		startDate,
+	}, {
+		cancelToken: CancelToken.token,
+	} ).then( async( response ) => {
 		// Update description only once
 		if ( count === total ) {
 			updateDescription( sprintf( __( 'Generating donations with status <string>%s</string>', 'give-test-data' ), statusName ) );
@@ -130,7 +145,12 @@ const generateDonationsRequest = ( { status, count, revenue, statusName, total }
 				updateProgerssBar( ( total - count ) / total * 100 );
 
 				await generateDonationsRequest( {
-					status, count: response.data.hasMore, revenue, statusName, total,
+					status,
+					count: response.data.hasMore,
+					revenue,
+					statusName,
+					total,
+					startDate,
 				} );
 			} else {
 				updateProgerssBar( 100 );
