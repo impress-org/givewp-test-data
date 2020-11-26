@@ -1,4 +1,5 @@
 import API, { CancelToken } from './api';
+import GiveModal from './modal';
 // Common
 import {
 	updateDescription,
@@ -20,11 +21,9 @@ const handleStatusSelect = ( e ) => {
 	const element = e.currentTarget;
 	const status = element.dataset.status;
 
-	document
-		.querySelectorAll( `input[name*="give_test_data_count[${ status }]"], input[name*="give_test_data_revenue[${ status }]"]` )
-		.forEach( ( input ) => {
-			input.toggleAttribute( 'disabled', ! element.checked );
-		} );
+	document.querySelectorAll( `input[name*="give_test_data_count[${ status }]"], input[name*="give_test_data_revenue[${ status }]"]` ).forEach( ( input ) => {
+		input.toggleAttribute( 'disabled', ! element.checked );
+	} );
 };
 
 /**
@@ -62,42 +61,34 @@ const generateDonations = ( e ) => {
 
 	// Check for selected donations
 	if ( ! Object.keys( data ).length ) {
-		// eslint-disable-next-line no-undef
-		return new Give.modal.GiveWarningAlert( {
-			modalContent: {
-				title: __( 'No donations are selected', 'give-test-data' ),
-				desc: __( 'You must select at least one donation status to generate', 'give-test-data' ),
-				cancelBtnTitle: __( 'OK', 'give-test-data' ),
-			},
-		} ).render();
+		return new GiveModal( {
+			type: 'warning',
+			title: __( 'No donations are selected', 'give-test-data' ),
+			desc: __( 'You must select at least one donation status to generate', 'give-test-data' ),
+			cancelButton: __( 'OK', 'give-test-data' ),
+		} );
 	}
 
 	// Check each status individually
 	for ( const [ , statusData ] of Object.entries( data ) ) {
 		if ( ! statusData.count ) {
-			// eslint-disable-next-line no-undef
-			return new Give.modal.GiveWarningAlert( {
-				modalContent: {
-					title: sprintf( __( 'Enter donation count for status %s', 'give-test-data' ), statusData.statusName ),
-					desc: __( 'You must enter donations count for each status', 'give-test-data' ),
-					cancelBtnTitle: __( 'OK', 'give-test-data' ),
-				},
-			} ).render();
+			return new GiveModal( {
+				type: 'warning',
+				title: sprintf( __( 'Enter donation count for status %s', 'give-test-data' ), statusData.statusName ),
+				content: __( 'You must enter donations count for each status', 'give-test-data' ),
+				cancelButton: __( 'OK', 'give-test-data' ),
+			} );
 		}
 	}
 
-	// eslint-disable-next-line no-undef
-	new Give.modal.GiveFormModal( {
-		modalContent: {
-			title: __( 'Generate donations', 'give-test-data' ),
-			desc: sprintf( __( 'Generate %s donations?', 'give-test-data' ), totalDonationsCount ),
-			cancelBtnTitle: __( 'Close', 'give-test-data' ),
-			confirmBtnTitle: __( 'Generate', 'give-test-data' ),
-			link: '',
-			link_text: '',
-		},
-		async successConfirm() {
-			generationStart( CancelToken );
+	new GiveModal( {
+		type: 'form',
+		title: __( 'Generate donations', 'give-test-data' ),
+		content: sprintf( __( 'Generate %s donations?', 'give-test-data' ), totalDonationsCount ),
+		cancelButton: __( 'Close', 'give-test-data' ),
+		confirmButton: __( 'Generate', 'give-test-data' ),
+		onConfirm: async() => {
+			generationStart();
 
 			for ( const [ status, statusData ] of Object.entries( data ) ) {
 				if ( statusData.revenue ) {
@@ -116,54 +107,52 @@ const generateDonations = ( e ) => {
 				window.location.reload( true );
 			}
 		},
-	} ).render();
+		onClose: () => {
+			CancelToken.cancel();
+			window.location.reload( true );
+		},
+	} );
 };
 
 const generateDonationsRequest = ( { status, count, revenue, statusName, total } ) => {
-	return API.post( '/generate-donations', { status, count, revenue }, { cancelToken: CancelToken.token } )
-		.then( async( response ) => {
-			// Update description only once
-			if ( count === total ) {
-				updateDescription( sprintf( __( 'Generating donations with status <string>%s</string>', 'give-test-data' ), statusName ) );
-			}
+	return API.post( '/generate-donations', {
+		status, count, revenue,
+	}, { cancelToken: CancelToken.token } ).then( async( response ) => {
+		// Update description only once
+		if ( count === total ) {
+			updateDescription( sprintf( __( 'Generating donations with status <string>%s</string>', 'give-test-data' ), statusName ) );
+		}
 
-			// Check status
-			if ( response.data.status ) {
-				// Check if it has more donations to process
-				if ( response.data.hasMore ) {
-					updateProgerssBar( ( total - count ) / total * 100 );
+		// Check status
+		if ( response.data.status ) {
+			// Check if it has more donations to process
+			if ( response.data.hasMore ) {
+				updateProgerssBar( ( total - count ) / total * 100 );
 
-					await generateDonationsRequest( {
-						status,
-						count: response.data.hasMore,
-						revenue,
-						statusName,
-						total,
-					} );
-				} else {
-					updateProgerssBar( 100 );
-				}
+				await generateDonationsRequest( {
+					status, count: response.data.hasMore, revenue, statusName, total,
+				} );
 			} else {
-				CancelToken.cancel();
-				State.set( { error: true } );
-
-				const message = response.data.message
-					? response.data.message
-					: __( 'Something went wrong. Check the error log', 'give-test-data' );
-
-				showRequestError( message );
+				updateProgerssBar( 100 );
 			}
-		} )
-		.catch( ( err ) => {
+		} else {
 			CancelToken.cancel();
 			State.set( { error: true } );
 
-			if ( err.response ) {
-				// eslint-disable-next-line no-console
-				console.error( err.response.data );
-				showRequestError( err.response.data.message );
-			}
-		} );
+			const message = response.data.message ? response.data.message : __( 'Something went wrong. Check the error log', 'give-test-data' );
+
+			showRequestError( message );
+		}
+	} ).catch( ( err ) => {
+		CancelToken.cancel();
+		State.set( { error: true } );
+
+		if ( err.response ) {
+			// eslint-disable-next-line no-console
+			console.error( err.response.data );
+			showRequestError( err.response.data.message );
+		}
+	} );
 };
 
 // Generate donations
