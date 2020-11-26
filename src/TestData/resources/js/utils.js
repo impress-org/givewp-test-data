@@ -1,8 +1,9 @@
 export const showGenerateButton = ( show ) => {
-	// Update title
-	document
-		.querySelector( '.give-popup-form-button' )
-		.classList.toggle( 'give-hidden', ! show );
+	const button = document.querySelector( '.give-button--primary' );
+
+	if ( button ) {
+		button.classList.toggle( 'give-hidden', ! show );
+	}
 };
 
 export const updateDescription = ( description ) => {
@@ -19,20 +20,10 @@ export const updateDescription = ( description ) => {
 	}
 };
 
-export const generationStart = ( CancelToken ) => {
+export const generationStart = () => {
 	showGenerateButton( false );
 	updateDescription( 'Initializing...' );
 	updateProgerssBar( 0 );
-
-	// Cancel requests if user closes the modal
-	if ( CancelToken ) {
-		document
-			.querySelector( '.give-popup-close-button' )
-			.addEventListener( 'click', function() {
-				CancelToken.cancel();
-				window.location.reload();
-			} );
-	}
 };
 
 export const showRequestError = ( error ) => {
