@@ -113,7 +113,7 @@ class DonationsRoute extends Endpoint {
 	}
 
 	/**
-	 * @param WP_REST_Request $request
+	 * @param  WP_REST_Request  $request
 	 *
 	 * @return WP_REST_Response
 	 * @since 1.0.0
@@ -126,20 +126,30 @@ class DonationsRoute extends Endpoint {
 		$revenue   = $request->get_param( 'revenue' );
 		$startDate = $request->get_param( 'startDate' );
 
-		$this->donationFactory->setDonationStatus( $status );
+		try {
 
-		if ( $revenue ) {
-			$this->donationFactory->setDonationAmount( $revenue );
+			$this->donationFactory->setDonationStatus( $status );
+
+			if ( $revenue ) {
+				$this->donationFactory->setDonationAmount( $revenue );
+			}
+
+			if ( $startDate ) {
+				$this->donationFactory->setDonationStartDate( $startDate );
+			}
+
+			// Check donations count and limit if necessary
+			$donationsCount = ( $count > $this->limit ) ? $this->limit : $count;
+			// Generate donations
+			$donations = $this->donationFactory->make( $donationsCount );
+
+		} catch ( Throwable $e ) {
+			return new WP_REST_Response( [
+				'status'  => false,
+				'message' => $e->getMessage()
+			] );
 		}
 
-		if ( $startDate ) {
-			$this->donationFactory->setDonationStartDate( $startDate );
-		}
-
-		// Check donations count and limit if necessary
-		$donationsCount = ( $count > $this->limit ) ? $this->limit : $count;
-		// Generate donations
-		$donations = $this->donationFactory->make( $donationsCount );
 		// Start DB transaction
 		$wpdb->query( 'START TRANSACTION' );
 

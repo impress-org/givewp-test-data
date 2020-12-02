@@ -24,8 +24,8 @@ class DonationSeedCommand {
 	private $donationRepository;
 
 	/**
-	 * @param DonationFactory $donationFactory
-	 * @param DonationRepository $donationRepository
+	 * @param  DonationFactory  $donationFactory
+	 * @param  DonationRepository  $donationRepository
 	 */
 	public function __construct(
 		DonationFactory $donationFactory,
@@ -85,33 +85,25 @@ class DonationSeedCommand {
 		$currency     = WP_CLI\Utils\get_flag_value( $assocArgs, 'currency', $default = give_get_option( 'currency' ) );
 		$startDate    = WP_CLI\Utils\get_flag_value( $assocArgs, 'start-date', $default = false );
 
-		// Check donation status
-		if ( ! $this->donationFactory->checkDonationStatus( $status ) ) {
-			WP_CLI::error(
-				WP_CLI::colorize( "Invalid donation status: %g{$status}%n \nGet all available donation statuses: %gwp give test-donation-statuses%n" )
-			);
-		}
+		try {
+			// Factory config
+			$this->donationFactory->setDonationStatus( $status );
+			$this->donationFactory->setDonationCurrency( $currency );
 
-		// Factory config
-		$this->donationFactory->setDonationStatus( $status );
-		$this->donationFactory->setDonationCurrency( $currency );
-
-		if ( $totalRevenue ) {
-			$this->donationFactory->setDonationAmount( ( $totalRevenue / $count ) );
-		}
-
-		if ( $startDate ) {
-			if ( $this->donationFactory->isValidDate( $startDate ) ) {
-				$this->donationFactory->setDonationStartDate( $startDate );
-			} else {
-				WP_CLI::error(
-					WP_CLI::colorize( "Invalid date: %g{$startDate}%n Valid date format is YYYY-MM-DD" )
-				);
+			if ( $totalRevenue ) {
+				$this->donationFactory->setDonationAmount( ( $totalRevenue / $count ) );
 			}
-		}
 
-		// Generate donations
-		$donations = $this->donationFactory->make( $count );
+			if ( $startDate ) {
+				$this->donationFactory->setDonationStartDate( $startDate );
+			}
+
+			// Generate donations
+			$donations = $this->donationFactory->make( $count );
+
+		} catch ( Throwable $e ) {
+			return WP_CLI::error( $e->getMessage() );
+		}
 
 		if ( $preview ) {
 			WP_CLI\Utils\format_items(
