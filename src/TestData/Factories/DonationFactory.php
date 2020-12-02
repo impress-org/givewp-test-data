@@ -3,6 +3,8 @@
 namespace GiveTestData\TestData\Factories;
 
 use GiveTestData\TestData\Framework\Factory;
+use DateTime;
+use InvalidArgumentException;
 
 /**
  * Class Donation
@@ -24,16 +26,26 @@ class DonationFactory extends Factory {
 	private $currency;
 
 	/**
-	 * @param string $status
+	 * @var string
+	 */
+	private $startDate;
+
+	/**
+	 * @param  string  $status
+	 *
+	 * @throws InvalidArgumentException
 	 */
 	public function setDonationStatus( $status ) {
+		if ( ! $this->checkDonationStatus( $status ) ) {
+			throw new InvalidArgumentException( "Invalid donation status {$status}" );
+		}
 		$this->status = $status;
 	}
 
 	/**
 	 * Check is valid donation status
 	 *
-	 * @param string $status
+	 * @param  string  $status
 	 *
 	 * @return bool
 	 */
@@ -61,7 +73,7 @@ class DonationFactory extends Factory {
 	}
 
 	/**
-	 * @param int $amount
+	 * @param  int  $amount
 	 */
 	public function setDonationAmount( $amount ) {
 		$this->amount = absint( $amount );
@@ -80,7 +92,7 @@ class DonationFactory extends Factory {
 
 
 	/**
-	 * @param string $currency
+	 * @param  string  $currency
 	 */
 	public function setDonationCurrency( $currency ) {
 		$this->currency = $currency;
@@ -97,6 +109,42 @@ class DonationFactory extends Factory {
 		return $this->currency;
 	}
 
+
+	/**
+	 * @param  string  $date
+	 *
+	 * @throws InvalidArgumentException
+	 */
+	public function setDonationStartDate( $date ) {
+		if ( ! $this->isValidDate( $date ) ) {
+			throw new InvalidArgumentException( "Invalid date {$date}" );
+		}
+		$this->startDate = $date;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getDonationDate() {
+		if ( ! $this->isValidDate( $this->startDate ) ) {
+			return $this->faker->dateTimeThisYear()->format( 'Y-m-d H:i:s' );
+		}
+
+		return $this->faker->dateTimeBetween( $this->startDate, $endDate = 'now' )->format( 'Y-m-d H:i:s' );
+	}
+
+	/**
+	 * @param  string  $date
+	 *
+	 * @return bool
+	 */
+	public function isValidDate( $date ) {
+		$dateTime = DateTime::createFromFormat( 'Y-m-d', $date );
+		// check dates, if one of them is different than the other, the date is not valid
+		// example: 2020-02-35 will be converted to 2020-03-06
+		return $dateTime && $dateTime->format( 'Y-m-d' ) === $date;
+	}
+
 	/**
 	 * Donation definition
 	 *
@@ -107,15 +155,15 @@ class DonationFactory extends Factory {
 
 		return [
 			'donor_id'             => $this->randomDonor(),
-			'payment_form_id'      => $donationForm['id'],
-			'payment_form_title'   => $donationForm['post_title'],
+			'payment_form_id'      => $donationForm[ 'id' ],
+			'payment_form_title'   => $donationForm[ 'post_title' ],
 			'payment_total'        => $this->getDonationAmount(),
 			'payment_currency'     => $this->getDonationCurrency(),
 			'payment_gateway'      => $this->randomGateway(),
 			'payment_mode'         => $this->randomPaymentMode(),
 			'payment_status'       => $this->getDonationStatus(),
 			'payment_purchase_key' => $this->faker->md5(),
-			'completed_date'       => $this->faker->dateTimeThisYear()->format( 'Y-m-d H:i:s' ),
+			'completed_date'       => $this->getDonationDate(),
 		];
 	}
 }

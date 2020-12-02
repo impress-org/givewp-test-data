@@ -24,8 +24,8 @@ class DonationSeedCommand {
 	private $donationRepository;
 
 	/**
-	 * @param DonationFactory $donationFactory
-	 * @param DonationRepository $donationRepository
+	 * @param  DonationFactory  $donationFactory
+	 * @param  DonationRepository  $donationRepository
 	 */
 	public function __construct(
 		DonationFactory $donationFactory,
@@ -65,9 +65,13 @@ class DonationSeedCommand {
 	 * : Preview generated data
 	 * default: false
 	 *
+	 * [--start-date=<date>]
+	 * : Set donation start date. Date format is YYYY-MM-DD
+	 * default: false
+	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp give test-donations --count=50 --status=random --total-revenue=10000 --currency=USD
+	 *     wp give test-donations --count=50 --status=random --total-revenue=10000 --currency=USD --start-date=2020-11-22
 	 *
 	 * @when after_wp_load
 	 */
@@ -79,24 +83,27 @@ class DonationSeedCommand {
 		$status       = WP_CLI\Utils\get_flag_value( $assocArgs, 'status', $default = 'publish' );
 		$totalRevenue = WP_CLI\Utils\get_flag_value( $assocArgs, 'total-revenue', $default = 0 );
 		$currency     = WP_CLI\Utils\get_flag_value( $assocArgs, 'currency', $default = give_get_option( 'currency' ) );
+		$startDate    = WP_CLI\Utils\get_flag_value( $assocArgs, 'start-date', $default = false );
 
-		// Check donation status
-		if ( ! $this->donationFactory->checkDonationStatus( $status ) ) {
-			WP_CLI::error(
-				WP_CLI::colorize( "Invalid donation status: %g{$status}%n \nGet all available donation statuses: %gwp give test-donation-statuses%n" )
-			);
+		try {
+			// Factory config
+			$this->donationFactory->setDonationStatus( $status );
+			$this->donationFactory->setDonationCurrency( $currency );
+
+			if ( $totalRevenue ) {
+				$this->donationFactory->setDonationAmount( ( $totalRevenue / $count ) );
+			}
+
+			if ( $startDate ) {
+				$this->donationFactory->setDonationStartDate( $startDate );
+			}
+
+			// Generate donations
+			$donations = $this->donationFactory->make( $count );
+
+		} catch ( Throwable $e ) {
+			return WP_CLI::error( $e->getMessage() );
 		}
-
-		// Factory config
-		$this->donationFactory->setDonationStatus( $status );
-		$this->donationFactory->setDonationCurrency( $currency );
-
-		if ( $totalRevenue ) {
-			$this->donationFactory->setDonationAmount( ( $totalRevenue / $count ) );
-		}
-
-		// Generate donations
-		$donations = $this->donationFactory->make( $count );
 
 		if ( $preview ) {
 			WP_CLI\Utils\format_items(

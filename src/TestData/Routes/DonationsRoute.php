@@ -24,9 +24,28 @@ class DonationsRoute extends Endpoint {
 	protected $endpoint = 'give-test-data/generate-donations';
 
 	/**
+	 * @var DonationFactory
+	 */
+	private $donationFactory;
+
+	/**
+	 * @var DonationRepository
+	 */
+	private $donationRepository;
+
+	public function __construct(
+		DonationFactory $donationFactory,
+		DonationRepository $donationRepository
+	) {
+		$this->donationFactory    = $donationFactory;
+		$this->donationRepository = $donationRepository;
+	}
+
+	/**
 	 * @inheritDoc
 	 */
-	public function registerRoute() {
+	public
+	function registerRoute() {
 		register_rest_route(
 			'give-api/v2',
 			$this->endpoint,
@@ -36,20 +55,24 @@ class DonationsRoute extends Endpoint {
 					'callback'            => [ $this, 'handleRequest' ],
 					'permission_callback' => [ $this, 'permissionsCheck' ],
 					'args'                => [
-						'status'  => [
+						'status'    => [
 							'type'              => 'string',
 							'required'          => true,
 							'validate_callback' => [ $this, 'validateDonationStatus' ],
 						],
-						'count'   => [
+						'count'     => [
 							'type'              => 'integer',
 							'required'          => true,
 							'sanitize_callback' => [ $this, 'sanitizeNumber' ],
 						],
-						'revenue' => [
+						'revenue'   => [
 							'type'              => 'integer',
 							'required'          => false,
 							'sanitize_callback' => [ $this, 'sanitizeNumber' ],
+						],
+						'startDate' => [
+							'type'     => 'string',
+							'required' => false,
 						],
 					],
 				],
@@ -62,30 +85,35 @@ class DonationsRoute extends Endpoint {
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function getSchema() {
+	public
+	function getSchema() {
 		return [
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'give-funds',
 			'type'       => 'object',
 			'properties' => [
-				'status'  => [
+				'status'    => [
 					'type'        => 'string',
 					'description' => esc_html__( 'Donation status', 'give-test-data' ),
 				],
-				'count'   => [
+				'count'     => [
 					'type'        => 'integer',
 					'description' => esc_html__( 'Number of donations to generate', 'give-test-data' ),
 				],
-				'revenue' => [
+				'revenue'   => [
 					'type'        => 'integer',
 					'description' => esc_html__( 'Revenue amount', 'give-test-data' ),
+				],
+				'startDate' => [
+					'type'        => 'string',
+					'description' => esc_html__( 'Start date', 'give-test-data' ),
 				],
 			],
 		];
 	}
 
 	/**
-	 * @param WP_REST_Request $request
+	 * @param  WP_REST_Request  $request
 	 *
 	 * @return WP_REST_Response
 	 * @since 1.0.0
@@ -93,30 +121,42 @@ class DonationsRoute extends Endpoint {
 	public function handleRequest( WP_REST_Request $request ) {
 		global $wpdb;
 
-		$donationFactory    = give( DonationFactory::class );
-		$donationRepository = give( DonationRepository::class );
+		$status    = $request->get_param( 'status' );
+		$count     = $request->get_param( 'count' );
+		$revenue   = $request->get_param( 'revenue' );
+		$startDate = $request->get_param( 'startDate' );
 
-		$status  = $request->get_param( 'status' );
-		$count   = $request->get_param( 'count' );
-		$revenue = $request->get_param( 'revenue' );
+		try {
 
-		$donationFactory->setDonationStatus( $status );
+			$this->donationFactory->setDonationStatus( $status );
 
-		if ( $revenue ) {
-			$donationFactory->setDonationAmount( $revenue );
+			if ( $revenue ) {
+				$this->donationFactory->setDonationAmount( $revenue );
+			}
+
+			if ( $startDate ) {
+				$this->donationFactory->setDonationStartDate( $startDate );
+			}
+
+			// Check donations count and limit if necessary
+			$donationsCount = ( $count > $this->limit ) ? $this->limit : $count;
+			// Generate donations
+			$donations = $this->donationFactory->make( $donationsCount );
+
+		} catch ( Throwable $e ) {
+			return new WP_REST_Response( [
+				'status'  => false,
+				'message' => $e->getMessage()
+			] );
 		}
 
-		// Check donations count and limit if necessary
-		$donationsCount = ( $count > $this->limit ) ? $this->limit : $count;
-		// Generate donations
-		$donations = $donationFactory->make( $donationsCount );
 		// Start DB transaction
 		$wpdb->query( 'START TRANSACTION' );
 
 		try {
 
 			foreach ( $donations as $donation ) {
-				$donationRepository->insertDonation( $donation );
+				$this->donationRepository->insertDonation( $donation );
 			}
 
 			$wpdb->query( 'COMMIT' );
