@@ -54,7 +54,7 @@
 			<?php esc_html_e( 'Set the earliest donation date', 'give-test-data' ); ?>
         </td>
         <td>
-            <input id="give-test-data-start-date" type="date"/>
+            <input id="give-test-data-start-date" name="give_test_data_start_date" type="date"/>
         </td>
     </tr>
 </table>
