@@ -21,7 +21,8 @@ class ServiceProvider implements GiveServiceProvider {
 	 * @inheritDoc
 	 */
 	public function boot() {
-		Hooks::addAction( 'give-test-data-donations-end', FeeRecoverySettings::class, 'renderDonationOptions', 20 );
-		Hooks::addAction( 'give-test-data-forms-end', FeeRecoverySettings::class, 'renderPagesOptions' );
+		// Update donation meta on donation insert
+		Hooks::addAction( 'give-test-data-insert-donation', FeeRecovery::class, 'addFee', 10, 3 );
+		Hooks::addAction( 'give-test-data-after-donations-table', FeeRecoverySettings::class, 'renderDonationOptions', 20 );
 	}
 }
