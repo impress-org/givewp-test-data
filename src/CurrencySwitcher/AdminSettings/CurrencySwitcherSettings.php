@@ -23,7 +23,8 @@ class CurrencySwitcherSettings {
 			View::render(
 				'CurrencySwitcher.donation-options',
 				[
-					'currencies' => $currencies,
+					'currencies'      => $currencies,
+					'defaultCurrency' => give_get_currency(),
 				]
 			);
 		}
