@@ -38,9 +38,9 @@ class PageFactory extends Factory {
 
 		$content = '';
 
-		foreach( $giveShortcodes as $shortcode ) {
+		foreach ( $giveShortcodes as $shortcode ) {
 			$content .= "<h3>[{$shortcode}]</h3>";
-			$content .= $this->getGiveShortcodeContent( $shortcode );
+			$content .= "[{$shortcode}]";
 		}
 
 		return $content;
@@ -56,25 +56,12 @@ class PageFactory extends Factory {
 
 		$shortcodes = [];
 
-		foreach(  $GLOBALS['shortcode_tags'] as $shortcode => $action ) {
-			if( false !== strpos( $shortcode, 'give_' ) ) {
+		foreach ( $GLOBALS[ 'shortcode_tags' ] as $shortcode => $action ) {
+			if ( false !== strpos( $shortcode, 'give_' ) ) {
 				$shortcodes[] = $shortcode;
 			}
 		}
 
 		return $shortcodes;
-	}
-
-	/**
-	 * Execute shortcode
-	 *
-	 * @param string $shortcode
-	 *
-	 * @return string
-	 */
-	private function getGiveShortcodeContent( $shortcode ) {
-		ob_start();
-		echo do_shortcode( "[{$shortcode }]" );
-		return ob_get_clean();
 	}
 }
