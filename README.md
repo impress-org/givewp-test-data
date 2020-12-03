@@ -8,7 +8,7 @@ Generate test data using CLI or from Admin UI
 1. download zip file from https://github.com/impress-org/givewp-test-data
 2. Install and activate the add-on
 
-### Admin interface 
+## Admin interface 
 Navigate to Donations -> Tools -> Test Data
 
 ### Generating test data
@@ -49,9 +49,9 @@ There is a specific order which you have to follow when generating the test data
 
 *Generate Page* generates a demonstration page which includes all the GiveWp shortcodes available
 
-### CLI Commands
+## CLI Commands
 
-#### Generate Donations
+### Generate Donations
 
 `wp give test-donation-form`
 
@@ -104,7 +104,7 @@ default: `false`
  `wp help give test-donation-form`
  
  
- #### Generate Donors
+ ### Generate Donors
  
  `wp give test-donors`
  
@@ -131,7 +131,7 @@ default: `false`
  `wp help give test-donors`
 
 
- #### Generate Donations
+ ### Generate Donations
  
  `wp give test-donations`
  
@@ -189,7 +189,7 @@ Example usage:
 
 default: `''`
 
-#### Generate GiveWP demonstartion page
+### Generate GiveWP demonstartion page
 
 `wp give test-demonstration-page`
 
