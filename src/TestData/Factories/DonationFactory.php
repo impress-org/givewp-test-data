@@ -152,9 +152,12 @@ class DonationFactory extends Factory {
 	 */
 	public function definition() {
 		$donationForm = $this->randomDonationForm();
+		$donor        = $this->RandomDonor();
 
 		return [
-			'donor_id'             => $this->randomDonor(),
+			'donor_id'             => $donor[ 'id' ],
+			'donor_name'           => $donor[ 'name' ],
+			'donor_email'          => $donor[ 'email' ],
 			'payment_form_id'      => $donationForm[ 'id' ],
 			'payment_form_title'   => $donationForm[ 'post_title' ],
 			'payment_total'        => $this->getDonationAmount(),

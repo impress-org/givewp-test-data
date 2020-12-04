@@ -41,13 +41,22 @@ const getSelectedStatusState = ( element ) => {
 };
 
 const getData = () => {
-	const data = { total: 0 };
+	const data = {
+		total: 0,
+		params: {},
+	};
+
 	const selectedStatuses = document.querySelectorAll( 'input[name*="give_test_data_status"]:checked' );
+
+	// Get all inputs which name is starting with "donation"
+	// These fields will be added as an additional parameter
+	const additionalInputs = document.querySelectorAll( '#give-mainform input[name^="donation"]' );
 
 	for ( const selectedStatus of selectedStatuses ) {
 		const { status, count, revenue, statusName } = getSelectedStatusState( selectedStatus );
 
 		data.statuses = {
+			...data.statuses,
 			[ status ]: {
 				count,
 				revenue,
@@ -60,6 +69,14 @@ const getData = () => {
 
 	data.startDate = document.querySelector( '#give-test-data-start-date' ).value;
 
+	// get all additional inputs
+	additionalInputs.forEach( ( input ) => {
+		data.params = {
+			...data.params,
+			[ input.name ]: input.value,
+		};
+	} );
+
 	return data;
 };
 
@@ -69,11 +86,11 @@ const generateDonations = ( e ) => {
 	const data = getData();
 
 	// Check for selected donations
-	if ( ! Object.keys( data ).length ) {
+	if ( ! data.statuses ) {
 		return new GiveModal( {
 			type: 'warning',
-			title: __( 'No donations are selected', 'give-test-data' ),
-			desc: __( 'You must select at least one donation status to generate', 'give-test-data' ),
+			title: __( 'Select donation status', 'give-test-data' ),
+			content: __( 'You must select at least one donation status to generate', 'give-test-data' ),
 			cancelButton: __( 'OK', 'give-test-data' ),
 		} );
 	}
@@ -110,6 +127,7 @@ const generateDonations = ( e ) => {
 					statusName: statusData.statusName,
 					total: statusData.count,
 					startDate: data.startDate,
+					params: data.params,
 				} );
 			}
 
@@ -124,12 +142,13 @@ const generateDonations = ( e ) => {
 	} );
 };
 
-const generateDonationsRequest = ( { status, count, revenue, statusName, total, startDate } ) => {
+const generateDonationsRequest = ( { status, count, revenue, statusName, total, startDate, params } ) => {
 	return API.post( '/generate-donations', {
 		status,
 		count,
 		revenue,
 		startDate,
+		params,
 	}, {
 		cancelToken: CancelToken.token,
 	} ).then( async( response ) => {
@@ -151,6 +170,7 @@ const generateDonationsRequest = ( { status, count, revenue, statusName, total, 
 					statusName,
 					total,
 					startDate,
+					params,
 				} );
 			} else {
 				updateProgerssBar( 100 );

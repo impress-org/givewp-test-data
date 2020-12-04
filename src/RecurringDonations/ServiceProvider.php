@@ -37,5 +37,6 @@ class ServiceProvider implements GiveServiceProvider {
 	 */
 	private function addCommands() {
 		WP_CLI::add_command( 'give recurring-donations', give()->make( RecurringDonationsCommand::class ) );
+		WP_CLI::add_command( 'give recurring-demonstration-page', give()->make( PageSeedCommand::class ) );
 	}
 }

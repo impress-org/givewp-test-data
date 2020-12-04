@@ -1,82 +1,212 @@
 # GiveWP - Test Data
-A demo plugin to serve as a boilerplate for developers to understand how to extend the GiveWP Donation
-plugin for WordPress.
-
-## Setup & Installation
-1. Clone this repository to your local
-2. Remove the `.git` directory
-3. Run `php build.php` from the CLI
-4. Run `composer install` from the CLI
-5. Run `npm install` from the CLI
-6. Update this README (see below for a starting point)
-
-### Asset Compilation
-To compile your CSS & JS assets, run one of the following:
-- `npm run dev` — Compiles all assets for development one time
-- `npm run watch` — Compiles all assets for development one time and then watches for changes, supporting [BrowserSync](https://laravel-mix.com/docs/5.0/browsersync)
-- `npm run hot` — Compiles all assets for development one time and then watches for [hot replacement](https://laravel-mix.com/docs/5.0/hot-module-replacement)
-- `npm run dev` — Compiles all assets for production one time
-
-## Concepts
-
-GiveWP follows a domain-driven model both in core and in add-ons. Each business feature defines
-its own domain, including whatever it needs (settings, models, etc.) to do what it does. It's also
-important these domains are portable, that is, they are not bound to the plugin and could move to or
-from another plugin as needed.
-
-For these reasons, each add-on has two primary directories for handling its logic:
-- src/Addon
-- src/Domain
-
-### src directory
-
-The src directory handles business domain logic (i.e. a specific feature). The src
-directory should have no files in the root, but be a collection of folders. Each folder represents
-a distinct domain. Even if there is only one domain for the add-on, it should still live inside a
-domain directory.
-
-### src/Domain directory
-
-It is possible for an add-on to have multiple domains, but it will always have at least one. Feel
-free to duplicate this directory and make more. This directory is just the starting point for the
-initial domain.
-
-### src/Addon directory
-
-This unique domain directory is responsible for the fact that the add-on is a WordPress plugin.
-Plugins do things such as activate, upgrade, and uninstall — the logic of which should be handled
-there. All GiveWP add-ons also check for compatibility with GiveWP core, and this also is handled
-here.
-
-The `src/Addon` directory may reference code in the `src` directory, but not the other way around.
-No domain code should reference (and therefore depend on) the `src/Addon` directory. Doing this
-keeps the dependency unidirectional.
-
-#### Note for developers
-If running `npm run dev` throws an error then check whether the `images` folder exists in your addon directory under `src/Addon/resources`. 
-1. If the `images` folder does not exist then create one. 
-2. If the `images` folder isn't required then remove the code from `webpack.config.js`.
-
----
-
-DELETE ABOVE THIS LINE WHEN REWRITING README
-
----
 
 ## Introduction
 
-[Write an introduction to what this addon is for]
-
-## Development
+Generate test data using CLI or from Admin UI
 
 ### Getting Set Up
-1. Clone this repository locally
-2. Run `composer install` from the CLI
-3. Run `npm install` from the CLI
+1. download zip file from https://github.com/impress-org/givewp-test-data
+2. Install and activate the add-on
 
-### Asset Compilation
-To compile your CSS & JS assets, run one of the following:
-- `npm run dev` — Compiles all assets for development one time
-- `npm run watch` — Compiles all assets for development one time and then watches for changes, supporting [BrowserSync](https://laravel-mix.com/docs/5.0/browsersync)
-- `npm run hot` — Compiles all assets for development one time and then watches for [hot replacement](https://laravel-mix.com/docs/5.0/hot-module-replacement)
-- `npm run dev` — Compiles all assets for production one time
+## Admin interface 
+Navigate to Donations -> Tools -> Test Data
+
+### Generating test data
+
+There is a specific order which you have to follow when generating the test data
+
+1. Generate Donation Forms 
+    - *If there are no Donation Forms available on the site, it's important to generate them first*
+
+2. Generate Donors
+
+3. Generate Donations
+
+### Generate Donation Forms screen options
+
+- Donation Forms count - *set the number of donations form to generate*
+- Form templates - *select the form template. If both templates are selected, the donation form template will be chosen randomly for each generated form*
+- Set Donation goal - *checking this option will set random donation goal for each generated donation form*
+- Generate Form T&C  - *checking this option will set random Terms&Conditions for each generated donation form*
+
+### Generate Donors screen options
+
+- Donors count - *set the number of donors to generate*
+
+### Generate Donations screen options
+
+**Donation statuses**
+
+- Status - *select the status of donations which you want to generate*
+- Count - *set the number of donations to generate*
+- Revenue - *set the total revenue amount of generated donations. If it's not set, the random donation amount will be used for each generated donation*
+
+**Set donation date**
+
+*Set the earliest donation date. The donation dates will still be randomly generated, but they won't go in the past before the selected "start date".* 
+
+### Generate Demonstration Page screen
+
+*Generate Page* generates a demonstration page which includes all the GiveWp shortcodes available
+
+## CLI Commands
+
+### Generate Donations
+
+`wp give test-donation-form`
+
+**Options**
+
+`[--count=<count>]`
+
+ Number of donations to generate
+ 
+ default: `10`
+ 
+ 
+`[--template=<template>]`
+
+ Form template
+
+ default: `random`
+ 
+ options: 
+ - `sequoia`
+ - `legacy`
+ - `random`
+ 
+ `[--set-goal=<bool>]`
+ 
+ Set donation form goal
+ 
+ default: `false`
+
+`[--set-terms=<bool>]`
+
+ Set donation form terms and conditions
+
+ default: `false`
+
+`[--preview=<preview>]`
+
+Preview generated data
+
+default: `false`
+
+
+**Example usage**
+
+ `wp give test-donation-form --count=10 --template=legacy --set-goal=true --set-terms=true`  
+ 
+ 
+ **Help**
+ 
+ `wp help give test-donation-form`
+ 
+ 
+ ### Generate Donors
+ 
+ `wp give test-donors`
+ 
+ **Options**
+ 
+`[--count=<count>]`
+
+Number of donors to generate
+
+default: `10`
+
+`[--preview=<preview>]`
+
+Preview generated data
+
+default: `false`
+
+**Example usage**
+
+`wp give test-donors --count=10 --preview=true`
+
+ **Help**
+ 
+ `wp help give test-donors`
+
+
+ ### Generate Donations
+ 
+ `wp give test-donations`
+ 
+ **Options**
+ 
+`[--count=<count>]`
+
+Number of donations to generate
+
+default: `10`
+
+`[--status=<status>]`
+
+Donation status
+
+default: `publish`
+
+options:
+- `publish`
+- `pending`
+- `refunded`
+- `cancelled`
+- `random`
+
+Get all available statuses with command:
+
+`wp give test-donation-statuses`
+
+
+`[--total-revenue=<amount>]`
+
+Total revenue amount to be generated
+
+default: `0`
+
+`[--preview=<preview>]`
+
+Preview generated data
+
+default: `false`
+
+`[--start-date=<date>]`
+
+Set donation start date. Date format is `YYYY-MM-DD`
+
+default: `false`
+
+`[--params=<params>]`
+
+Used for passing additional parameters
+
+Example usage: 
+
+`--params=donation_currency=EUR\&donation_cover_fees=true`
+
+default: `''`
+
+### Generate GiveWP demonstartion page
+
+`wp give test-demonstration-page`
+
+Generates GiveWP demonstartion page with all GiveWP shortcodes included
+
+ **Options**
+ 
+`[--preview=<preview>]`
+
+Preview generated data
+
+default: `false`
+
+**Example usage**
+
+`wp give test-demonstration-page --count=10 --preview=true`
+
+ **Help**
+ 
+ `wp help give test-demonstration-page`

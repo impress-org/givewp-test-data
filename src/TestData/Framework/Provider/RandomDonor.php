@@ -9,8 +9,8 @@ class RandomDonor extends RandomProvider {
 
 	public function __invoke() {
 		global $wpdb;
-		$donorIDs = $wpdb->get_col( "SELECT id FROM {$wpdb->prefix}give_donors" );
+		$donors = $wpdb->get_results( "SELECT id, name, email FROM {$wpdb->prefix}give_donors", ARRAY_A );
 
-		return $this->faker->randomElement( $donorIDs );
+		return $this->faker->randomElement( $donors );
 	}
 }

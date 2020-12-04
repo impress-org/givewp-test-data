@@ -9,6 +9,7 @@ class RandomGateway extends RandomProvider {
 		'paypal-commerce',
 		'stripe',
 		'manual',
+		'manual_donation',
 	];
 
 	public function __invoke() {

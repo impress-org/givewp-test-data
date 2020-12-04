@@ -2,6 +2,7 @@
 
 namespace GiveTestData\ManualDonations;
 
+use Give\Helpers\Hooks;
 use Give\ServiceProviders\ServiceProvider as GiveServiceProvider;
 
 /**
@@ -19,5 +20,8 @@ class ServiceProvider implements GiveServiceProvider {
 	 * @inheritDoc
 	 */
 	public function boot() {
+
+		// Update donation meta on donation insert
+		Hooks::addAction( 'give-test-data-insert-donation', ManualDonations::class, 'updateDonationMeta', 10, 2 );
 	}
 }

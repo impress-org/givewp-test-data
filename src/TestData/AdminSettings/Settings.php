@@ -35,7 +35,7 @@ class Settings extends \Give_Settings_Page {
 			'forms'     => esc_html__( 'Generate Donation Forms', 'give-test-data' ),
 			'donors'    => esc_html__( 'Generate Donors', 'give-test-data' ),
 			'donations' => esc_html__( 'Generate Donations', 'give-test-data' ),
-			'pages'     => esc_html__( 'Generate Pages', 'give-test-data' ),
+			'pages'     => esc_html__( 'Generate Demonstration page', 'give-test-data' ),
 		];
 
 		return apply_filters( 'give_get_sections_' . $this->id, $sections );

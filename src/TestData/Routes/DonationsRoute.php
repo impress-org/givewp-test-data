@@ -74,6 +74,11 @@ class DonationsRoute extends Endpoint {
 							'type'     => 'string',
 							'required' => false,
 						],
+						'params'    => [
+							'type'     => 'json',
+							'required' => false,
+							'default'  => '',
+						],
 					],
 				],
 				'schema' => [ $this, 'getSchema' ]
@@ -108,6 +113,10 @@ class DonationsRoute extends Endpoint {
 					'type'        => 'string',
 					'description' => esc_html__( 'Start date', 'give-test-data' ),
 				],
+				'params'    => [
+					'type'        => 'json',
+					'description' => esc_html__( 'Additional params', 'give-test-data' ),
+				],
 			],
 		];
 	}
@@ -125,6 +134,7 @@ class DonationsRoute extends Endpoint {
 		$count     = $request->get_param( 'count' );
 		$revenue   = $request->get_param( 'revenue' );
 		$startDate = $request->get_param( 'startDate' );
+		$params    = $request->get_param( 'params' );
 
 		try {
 
@@ -156,7 +166,7 @@ class DonationsRoute extends Endpoint {
 		try {
 
 			foreach ( $donations as $donation ) {
-				$this->donationRepository->insertDonation( $donation );
+				$this->donationRepository->insertDonation( $donation, $params );
 			}
 
 			$wpdb->query( 'COMMIT' );

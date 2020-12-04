@@ -57,10 +57,6 @@ class DonationSeedCommand {
 	 * : Total revenue amount to be generated
 	 * default: 0
 	 *
-	 * [--currency=<currency>]
-	 * : Donation currency
-	 * default: GiveWP default currency
-	 *
 	 * [--preview=<preview>]
 	 * : Preview generated data
 	 * default: false
@@ -69,9 +65,13 @@ class DonationSeedCommand {
 	 * : Set donation start date. Date format is YYYY-MM-DD
 	 * default: false
 	 *
+	 * [--params=<params>]
+	 * : Additinal params
+	 * default: ''
+	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp give test-donations --count=50 --status=random --total-revenue=10000 --currency=USD --start-date=2020-11-22
+	 *     wp give test-donations --count=50 --status=random --total-revenue=10000 --start-date=2020-11-22 --params=donation_currency=EUR
 	 *
 	 * @when after_wp_load
 	 */
@@ -82,13 +82,15 @@ class DonationSeedCommand {
 		$preview      = WP_CLI\Utils\get_flag_value( $assocArgs, 'preview', $default = false );
 		$status       = WP_CLI\Utils\get_flag_value( $assocArgs, 'status', $default = 'publish' );
 		$totalRevenue = WP_CLI\Utils\get_flag_value( $assocArgs, 'total-revenue', $default = 0 );
-		$currency     = WP_CLI\Utils\get_flag_value( $assocArgs, 'currency', $default = give_get_option( 'currency' ) );
 		$startDate    = WP_CLI\Utils\get_flag_value( $assocArgs, 'start-date', $default = false );
+		$additional   = WP_CLI\Utils\get_flag_value( $assocArgs, 'params', $default = '' );
+
+		// Additional params
+		parse_str( $additional, $params );
 
 		try {
 			// Factory config
 			$this->donationFactory->setDonationStatus( $status );
-			$this->donationFactory->setDonationCurrency( $currency );
 
 			if ( $totalRevenue ) {
 				$this->donationFactory->setDonationAmount( ( $totalRevenue / $count ) );
@@ -120,7 +122,7 @@ class DonationSeedCommand {
 			try {
 
 				foreach ( $donations as $donation ) {
-					$this->donationRepository->insertDonation( $donation );
+					$this->donationRepository->insertDonation( $donation, $params );
 					$progress->tick();
 				}
 
