@@ -8,6 +8,7 @@ class RandomGateway extends RandomProvider {
 	protected $gateways = [
 		'paypal-commerce',
 		'stripe',
+		'manual',
 		'manual_donation',
 	];
 
