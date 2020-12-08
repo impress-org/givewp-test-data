@@ -5,7 +5,7 @@
 Generate test data using WP-CLI or from an easy-to-use admin interface.
 
 ### Getting Set Up
-1. download zip file from https://github.com/impress-org/givewp-test-data
+1. download zip file from https://github.com/impress-org/givewp-test-data/releases
 2. Install and activate the add-on
 
 ## Admin interface 
