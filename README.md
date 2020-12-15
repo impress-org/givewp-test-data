@@ -1,12 +1,11 @@
-# GiveWP - Test Data
+# GiveWP - Test Data Generator
 
 ## Introduction
 
-Generate test data using Admin UI
+Generate test data using an easy-to-use admin interface.
 
 ### Getting Set Up
-
-1. download zip file from https://github.com/impress-org/givewp-test-data
+1. download zip file from https://github.com/impress-org/givewp-test-data/releases
 2. Install and activate the add-on
 
 ## Admin interface

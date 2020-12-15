@@ -5,9 +5,9 @@ use GiveTestData\TestData\Helpers\Addons;
 use GiveTestData\TestData\ServiceProvider;
 
 /**
- * Plugin Name: Give Test Data
- * Plugin URI:  https://givewp.com/addons/BOILERPLATE/
- * Description: Test Data Generator
+ * Plugin Name: Give - Test Data Generator
+ * Plugin URI:  https://givewp.com/
+ * Description: This plugin makes it easy to generate test (dummy) donors, donations, donation forms, and more using an easy-to-use interface.
  * Version:     1.0.0
  * Author:      GiveWP
  * Author URI:  https://givewp.com/
@@ -17,7 +17,7 @@ use GiveTestData\TestData\ServiceProvider;
 defined( 'ABSPATH' ) or exit;
 
 // Add-on name
-define( 'GIVE_TEST_DATA_NAME', 'Give Test Data' );
+define( 'GIVE_TEST_DATA_NAME', 'Give - Test Data Generator' );
 
 // Versions
 define( 'GIVE_TEST_DATA_VERSION', '1.0.0' );
