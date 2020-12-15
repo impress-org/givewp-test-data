@@ -2,7 +2,7 @@
 
 namespace GiveTestData\TestData\Routes;
 
-use GiveTestData\TestData\Factories\PageFactory;
+use Give\TestData\Factories\PageFactory;
 use Throwable;
 use WP_REST_Request;
 use WP_REST_Response;
