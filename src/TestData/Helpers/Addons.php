@@ -6,8 +6,6 @@ use GiveTestData\Funds\ServiceProvider as Funds;
 use GiveTestData\CurrencySwitcher\ServiceProvider as CurrencySwitcher;
 use GiveTestData\FeeRecovery\ServiceProvider as FeeRecovery;
 use GiveTestData\RecurringDonations\ServiceProvider as RecurringDonations;
-use GiveTestData\ManualDonations\ServiceProvider as ManualDonations;
-use GiveTestData\FormFieldManager\ServiceProvider as FormFieldManager;
 
 /**
  * Class Addons
@@ -39,14 +37,6 @@ class Addons {
 				'serviceProvider' => FeeRecovery::class,
 			],
 			[
-				'isActive'        => defined( 'GIVE_MD_VERSION' ),
-				'serviceProvider' => ManualDonations::class,
-			],
-			[
-				'isActive'        => defined( 'GIVE_FFM_VERSION' ),
-				'serviceProvider' => FormFieldManager::class,
-			],
-			[
 				'isActive'        => defined( 'GIVE_FUNDS_ADDON_VERSION' ),
 				'serviceProvider' => Funds::class,
 			],
@@ -62,7 +52,7 @@ class Addons {
 		return array_filter(
 			self::getAddons(),
 			function ( $addon ) {
-				return $addon['isActive'];
+				return $addon[ 'isActive' ];
 			}
 		);
 	}

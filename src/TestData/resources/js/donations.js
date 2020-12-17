@@ -73,7 +73,7 @@ const getData = () => {
 	additionalInputs.forEach( ( input ) => {
 		data.params = {
 			...data.params,
-			[ input.name ]: input.value,
+			[ input.name ]: ( 'checkbox' === input.type ) ? input.checked : input.value,
 		};
 	} );
 

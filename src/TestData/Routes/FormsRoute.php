@@ -5,8 +5,8 @@ namespace GiveTestData\TestData\Routes;
 use Throwable;
 use WP_REST_Request;
 use WP_REST_Response;
-use GiveTestData\TestData\Factories\DonationFormFactory as DonationFormFactory;
-use GiveTestData\TestData\Repositories\DonationFormRepository as DonationFormRepository;
+use Give\TestData\Factories\DonationFormFactory as DonationFormFactory;
+use Give\TestData\Repositories\DonationFormRepository as DonationFormRepository;
 
 /**
  * Class FormsRoute
@@ -18,7 +18,7 @@ class FormsRoute extends Endpoint {
 	 * Maximum number of donation forms to generate per request
 	 * @var int
 	 */
-	private $limit = 30;
+	private $limit = 50;
 
 	/** @var string */
 	protected $endpoint = 'give-test-data/generate-forms';
@@ -36,8 +36,8 @@ class FormsRoute extends Endpoint {
 	/**
 	 * FormsRoute constructor.
 	 *
-	 * @param DonationFormFactory $donationFormFactory
-	 * @param DonationFormRepository $donationFormRepository
+	 * @param  DonationFormFactory  $donationFormFactory
+	 * @param  DonationFormRepository  $donationFormRepository
 	 */
 	public function __construct(
 		DonationFormFactory $donationFormFactory,
@@ -78,6 +78,11 @@ class FormsRoute extends Endpoint {
 							'type'     => 'boolean',
 							'required' => false,
 						],
+						'params'     => [
+							'type'     => 'json',
+							'required' => false,
+							'default'  => '',
+						],
 					],
 				],
 				'schema' => [ $this, 'getSchema' ]
@@ -111,12 +116,16 @@ class FormsRoute extends Endpoint {
 					'type'        => 'boolean',
 					'description' => esc_html__( 'Generate Donation Terms & Conditions', 'give-test-data' ),
 				],
+				'params'     => [
+					'type'        => 'json',
+					'description' => esc_html__( 'Additional params', 'give-test-data' ),
+				],
 			],
 		];
 	}
 
 	/**
-	 * @param WP_REST_Request $request
+	 * @param  WP_REST_Request  $request
 	 *
 	 * @return WP_REST_Response
 	 * @since 1.0.0
@@ -124,10 +133,12 @@ class FormsRoute extends Endpoint {
 	public function handleRequest( WP_REST_Request $request ) {
 		global $wpdb;
 
-		$count    = $request->get_param( 'count' );
-		$template = $request->get_param( 'template' );
-		$setGoal  = $request->get_param( 'setGoal' );
-		$setTerms = $request->get_param( 'setTerms' );
+		$count      = $request->get_param( 'count' );
+		$template   = $request->get_param( 'template' );
+		$setGoal    = $request->get_param( 'setGoal' );
+		$setTerms   = $request->get_param( 'setTerms' );
+		$params     = $request->get_param( 'params' );
+		$consistent = ( isset( $params[ 'donations_consitent_data' ] ) && $params[ 'donations_consitent_data' ] );
 
 		// Check forms count and limit if necessary
 		$formsCount = ( $count > $this->limit ) ? $this->limit : $count;
@@ -138,7 +149,7 @@ class FormsRoute extends Endpoint {
 		$this->donationFormFactory->setTermsAndConditions( $setTerms );
 
 		// Generate donation forms
-		$forms = $this->donationFormFactory->make( $formsCount );
+		$forms = $this->donationFormFactory->consistent( $consistent )->make( $formsCount );
 		// Start DB transaction
 		$wpdb->query( 'START TRANSACTION' );
 

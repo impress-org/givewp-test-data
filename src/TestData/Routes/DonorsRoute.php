@@ -5,8 +5,8 @@ namespace GiveTestData\TestData\Routes;
 use WP_REST_Request;
 use WP_REST_Response;
 use Throwable;
-use GiveTestData\TestData\Factories\DonorFactory as DonorFactory;
-use GiveTestData\TestData\Repositories\DonorRepository as DonorRepository;
+use Give\TestData\Factories\DonorFactory as DonorFactory;
+use Give\TestData\Repositories\DonorRepository as DonorRepository;
 
 /**
  * Class DonorsRoute
@@ -18,7 +18,7 @@ class DonorsRoute extends Endpoint {
 	 * Maximum number of donors to generate per request
 	 * @var int
 	 */
-	private $limit = 30;
+	private $limit = 50;
 
 	/** @var string */
 	protected $endpoint = 'give-test-data/generate-donors';
@@ -67,7 +67,7 @@ class DonorsRoute extends Endpoint {
 	}
 
 	/**
-	 * @param WP_REST_Request $request
+	 * @param  WP_REST_Request  $request
 	 *
 	 * @return WP_REST_Response
 	 * @since 1.0.0
@@ -78,11 +78,13 @@ class DonorsRoute extends Endpoint {
 		$donorFactory    = give( DonorFactory::class );
 		$donorRepository = give( DonorRepository::class );
 		$count           = $request->get_param( 'count' );
+		$params          = $request->get_param( 'params' );
+		$consistent      = ( isset( $params[ 'donations_consitent_data' ] ) && $params[ 'donations_consitent_data' ] );
 
 		// Check donors count and limit if necessary
 		$donorsCount = ( $count > $this->limit ) ? $this->limit : $count;
 		// Generate donors
-		$donors = $donorFactory->make( $donorsCount );
+		$donors = $donorFactory->consistent( $consistent )->make( $donorsCount );
 		// Start DB transaction
 		$wpdb->query( 'START TRANSACTION' );
 

@@ -5,8 +5,8 @@ namespace GiveTestData\TestData\Routes;
 use WP_REST_Request;
 use WP_REST_Response;
 use Throwable;
-use GiveTestData\TestData\Factories\DonationFactory as DonationFactory;
-use GiveTestData\TestData\Repositories\DonationRepository as DonationRepository;
+use Give\TestData\Factories\DonationFactory as DonationFactory;
+use Give\TestData\Repositories\DonationRepository as DonationRepository;
 
 /**
  * Class FundOverviewRoute
@@ -18,7 +18,7 @@ class DonationsRoute extends Endpoint {
 	 * Maximum number of donations to generate per request
 	 * @var int
 	 */
-	private $limit = 30;
+	private $limit = 50;
 
 	/** @var string */
 	protected $endpoint = 'give-test-data/generate-donations';
@@ -130,11 +130,12 @@ class DonationsRoute extends Endpoint {
 	public function handleRequest( WP_REST_Request $request ) {
 		global $wpdb;
 
-		$status    = $request->get_param( 'status' );
-		$count     = $request->get_param( 'count' );
-		$revenue   = $request->get_param( 'revenue' );
-		$startDate = $request->get_param( 'startDate' );
-		$params    = $request->get_param( 'params' );
+		$status     = $request->get_param( 'status' );
+		$count      = $request->get_param( 'count' );
+		$revenue    = $request->get_param( 'revenue' );
+		$startDate  = $request->get_param( 'startDate' );
+		$params     = $request->get_param( 'params' );
+		$consistent = ( isset( $params[ 'donations_consitent_data' ] ) && $params[ 'donations_consitent_data' ] );
 
 		try {
 
@@ -151,7 +152,7 @@ class DonationsRoute extends Endpoint {
 			// Check donations count and limit if necessary
 			$donationsCount = ( $count > $this->limit ) ? $this->limit : $count;
 			// Generate donations
-			$donations = $this->donationFactory->make( $donationsCount );
+			$donations = $this->donationFactory->consistent( $consistent )->make( $donationsCount );
 
 		} catch ( Throwable $e ) {
 			return new WP_REST_Response( [
