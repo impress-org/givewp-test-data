@@ -5,10 +5,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## 1.0.0
+
 ### Changed
 
 - CLI commands and related logic is now moved to the GiveWP core (#19)
-
-## 1.0.0
-
+  
+### New
 - Initial release

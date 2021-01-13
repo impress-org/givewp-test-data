@@ -21,7 +21,7 @@ define( 'GIVE_TEST_DATA_NAME', 'Give - Test Data Generator' );
 
 // Versions
 define( 'GIVE_TEST_DATA_VERSION', '1.0.0' );
-define( 'GIVE_TEST_DATA_MIN_GIVE_VERSION', '2.9.5' );
+define( 'GIVE_TEST_DATA_MIN_GIVE_VERSION', '2.9.6' );
 
 // Add-on paths
 define( 'GIVE_TEST_DATA_FILE', __FILE__ );
