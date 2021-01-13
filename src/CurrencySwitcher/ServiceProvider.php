@@ -22,9 +22,5 @@ class ServiceProvider implements GiveServiceProvider {
 	 */
 	public function boot() {
 		Hooks::addAction( 'give-test-data-after-donations-table', CurrencySwitcherSettings::class, 'renderDonationOptions', 20 );
-		// Add donation currency meta
-		Hooks::addAction( 'give-test-data-insert-donation', CurrencySwitcher::class, 'addDonationCurrencyMeta', 10, 2 );
-		// Set donation currency
-		Hooks::addFilter( 'give-test-data-donation-definition', CurrencySwitcher::class, 'setDonationCurrency', 10, 2 );
 	}
 }

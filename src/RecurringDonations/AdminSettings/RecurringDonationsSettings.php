@@ -5,8 +5,8 @@ namespace GiveTestData\RecurringDonations\AdminSettings;
 use GiveTestData\Addon\View;
 
 /**
- * Class Donations
- * @package GiveTestData\RecurringDonations
+ * Class RecurringDonationsSettings
+ * @package GiveTestData\RecurringDonations\AdminSettings
  */
 class RecurringDonationsSettings {
 	/**

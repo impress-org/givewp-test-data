@@ -17,19 +17,33 @@ const State = new AppState( {
 } );
 
 const getFundsCount = () => {
-	const input = document.querySelector( '#give-test-data-funds-count' );
+	const data = {
+		count: 0,
+		params: {},
+	};
 
-	if ( input ) {
-		return parseInt( input.value );
+	const foundCount = document.querySelector( '#give-test-data-funds-count' );
+	const additionalInputs = document.querySelectorAll( '#give-mainform input[name^="donation"]' );
+
+	// get all additional inputs
+	additionalInputs.forEach( ( input ) => {
+		data.params = {
+			...data.params,
+			[ input.name ]: ( 'checkbox' === input.type ) ? input.checked : input.value,
+		};
+	} );
+
+	if ( foundCount ) {
+		data.count = parseInt( foundCount.value );
 	}
 
-	return 0;
+	return data;
 };
 
 const generateFunds = ( e ) => {
 	e.preventDefault();
 
-	const count = getFundsCount();
+	const { count, params } = getFundsCount();
 
 	// Check the funds count
 	if ( ! count ) {
@@ -52,6 +66,7 @@ const generateFunds = ( e ) => {
 
 			await generateFundsRequest( {
 				count,
+				params,
 				total: count,
 			} );
 
@@ -67,8 +82,10 @@ const generateFunds = ( e ) => {
 	} );
 };
 
-const generateFundsRequest = ( { count, total } ) => {
-	return API.post( '/generate-funds', { count }, { cancelToken: CancelToken.token } ).then( async( response ) => {
+const generateFundsRequest = ( { count, params, total } ) => {
+	return API.post( '/generate-funds', {
+		count, params,
+	}, { cancelToken: CancelToken.token } ).then( async( response ) => {
 		// Update description only once
 		if ( count === total ) {
 			updateDescription( __( 'Generating funds', 'give-test-data' ) );
@@ -81,6 +98,7 @@ const generateFundsRequest = ( { count, total } ) => {
 
 				await generateFundsRequest( {
 					count: response.data.hasMore,
+					params,
 					total,
 				} );
 			} else {

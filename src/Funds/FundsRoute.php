@@ -7,6 +7,8 @@ use WP_REST_Request;
 use WP_REST_Response;
 use Throwable;
 use GiveTestData\TestData\Routes\Endpoint;
+use Give\TestData\Addons\Funds\FundFactory;
+use Give\TestData\Addons\Funds\FundRepository;
 
 /**
  * Class FundsRoute
@@ -36,10 +38,15 @@ class FundsRoute extends Endpoint {
 					'callback'            => [ $this, 'handleRequest' ],
 					'permission_callback' => [ $this, 'permissionsCheck' ],
 					'args'                => [
-						'count' => [
+						'count'  => [
 							'type'              => 'integer',
 							'required'          => true,
 							'sanitize_callback' => [ $this, 'sanitizeNumber' ],
+						],
+						'params' => [
+							'type'     => 'json',
+							'required' => false,
+							'default'  => '',
 						],
 					],
 				],
@@ -58,16 +65,20 @@ class FundsRoute extends Endpoint {
 			'title'      => 'give-test-data',
 			'type'       => 'object',
 			'properties' => [
-				'count' => [
+				'count'  => [
 					'type'        => 'integer',
 					'description' => esc_html__( 'Number of funds to generate', 'give-test-data' ),
+				],
+				'params' => [
+					'type'        => 'json',
+					'description' => esc_html__( 'Additional params', 'give-test-data' ),
 				],
 			],
 		];
 	}
 
 	/**
-	 * @param WP_REST_Request $request
+	 * @param  WP_REST_Request  $request
 	 *
 	 * @return WP_REST_Response
 	 * @since 1.0.0
@@ -78,11 +89,13 @@ class FundsRoute extends Endpoint {
 		$fundFactory    = give( FundFactory::class );
 		$fundRepository = give( FundRepository::class );
 		$count          = $request->get_param( 'count' );
+		$params         = $request->get_param( 'params' );
+		$consistent     = ( isset( $params[ 'donations_consitent_data' ] ) && $params[ 'donations_consitent_data' ] );
 
 		// Check funds count and limit if necessary
 		$fundsCount = ( $count > $this->limit ) ? $this->limit : $count;
 		// Generate funds
-		$funds = $fundFactory->make( $fundsCount );
+		$funds = $fundFactory->consistent( $consistent )->make( $fundsCount );
 		// Start DB transaction
 		$wpdb->query( 'START TRANSACTION' );
 
