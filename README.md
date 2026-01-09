@@ -1,5 +1,8 @@
 # GiveWP - Test Data Generator
 
+> [!IMPORTANT]
+> This generator is considered legacy, for compatability with GiveWP 4.0+ versions use https://github.com/impress-org/give-data-generator
+
 ## Introduction
 
 Generate test data using an easy-to-use admin interface.
